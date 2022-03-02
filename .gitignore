@@ -1,0 +1,11 @@
+# dir
+.vs
+bin
+bin-int
+output
+
+# files
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
