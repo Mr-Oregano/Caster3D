@@ -1,28 +1,21 @@
 
-#include <stb_image/stb_image_write.h>
+#include "RayTracer.h"
 
+#include <stb_image/stb_image_write.h>
 #include <cstdint>
+
+static const int output_width = 1920;
+static const int output_height = 1080;
 
 int main()
 {
-	std::uint8_t *image_buffer = new std::uint8_t[512 * 512 * 3];
+	std::uint8_t *image_buffer = new std::uint8_t[output_width * output_height * 3];
 
-	for (int i = 0; i < 512 * 512 * 3; i += 3)
-	{
-		int x = (i / 3) % 512;
-		int y = (i / 3) / 512;
+	RayTracer tracer(nullptr, nullptr, nullptr);
 
-		double r, g, b;
-		r = x / 512.0;
-		g = 1.0;
-		b = y / 512.0;
+	tracer.Draw(output_width, output_height, image_buffer);
 
-		image_buffer[i + 0] = (int) (r * 255);
-		image_buffer[i + 1] = (int) (g * 255);
-		image_buffer[i + 2] = (int) (b * 255);
-	}
-
-	stbi_write_png("./output/out.png", 512, 512, 3, image_buffer, 512 * 3);
+	stbi_write_png("./output/out.png", output_width, output_height, 3, image_buffer, output_width * 3);
 
 	delete [] image_buffer;
 }
