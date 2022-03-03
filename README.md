@@ -1,5 +1,5 @@
 # Caster3D
-CPU raycaster written in C++.
+CPU raytracer written in C++.
 
 # Build
 Use [premake5](https://premake.github.io/) to create project files. Building should be relatively simple from there. Just build in your IDE of choice or `make.` if you're using make. 
