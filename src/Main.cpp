@@ -1,21 +1,35 @@
 
 #include "RayTracer.h"
 
-#include <stb_image/stb_image_write.h>
-#include <cstdint>
+#include "Light.h"
+#include "Camera.h"
+#include "Cube.h"
 
-static const int output_width = 1920;
-static const int output_height = 1080;
+#include "ImageBuffer.h"
+
+#include <stb_image/stb_image_write.h>
 
 int main()
-{
-	std::uint8_t *image_buffer = new std::uint8_t[output_width * output_height * 3];
+{	
+	Cube cubeMesh;
 
-	RayTracer tracer(nullptr, nullptr, nullptr);
+	glm::mat4 model{ 1.0f };
+	model = glm::rotate(model, glm::radians(45.0f), glm::vec3{ 1.0f, 0.0f, 0.0f });
+	model = glm::rotate(model, glm::radians(45.0f), glm::vec3{ 0.0f, 1.0f, 0.0f });
 
-	tracer.Draw(output_width, output_height, image_buffer);
+	cubeMesh.Transform(model);
 
-	stbi_write_png("./output/out.png", output_width, output_height, 3, image_buffer, output_width * 3);
+	Light light(glm::vec3{ 0.0f, 1.0f, 1.0f }, glm::vec3{ 1.0 });
+	Camera3D camera(glm::vec3{ 0.0f, 0.0f, 2.0f }, glm::vec3{ 0.0f });
 
-	delete [] image_buffer;
+	RayTracer tracer(&light, &camera, &cubeMesh);
+
+	ImageBuffer target(1920, 1080);
+
+	tracer.Draw(target);
+
+	auto [ width, height ] = target.GetExtent();
+	std::uint8_t bpp = target.GetBytesPerPixel();
+
+	stbi_write_png("./output/out.png", width, height, 3, target.GetBuffer(), width * bpp);
 }

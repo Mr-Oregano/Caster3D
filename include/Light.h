@@ -4,6 +4,10 @@
 
 struct Light
 {
-	glm::vec3 dir;
-	glm::vec4 color;
+	glm::vec3 pos;
+	glm::vec3 color;
+
+public:
+	Light() = default;
+	Light(glm::vec3 pos, glm::vec3 color);
 };

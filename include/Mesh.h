@@ -1,15 +1,19 @@
 #pragma once
 
+#include <Triangle.h>
+
 #include <glm/glm.hpp>
 
-struct Triangle
+class Mesh
 {
-	glm::vec3 v[3];
-	glm::vec3 normal;
+public:
+	Triangle *_triangles;
+	std::size_t _count;
+
+public:
+	Mesh(Triangle _primitives[], std::size_t count);
+	virtual ~Mesh() = default;
+
+	void Transform(const glm::mat4 &model);
 };
 
-struct Mesh
-{
-	Triangle *_primitives;
-	std::size_t _size;
-};

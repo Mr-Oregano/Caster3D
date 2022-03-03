@@ -6,14 +6,12 @@
 class Camera3D
 {
 private:
-	glm::mat4 _view;
-	glm::mat4 _proj;
+	glm::vec3 _eye;
+	glm::vec3 _lookAt;
 
 public:
-	Camera3D(float fov, float aspect);
+	Camera3D(glm::vec3 eye, glm::vec3 target);
 
-	void MoveTo(glm::vec3 loc);
-	void Rotate(glm::quat rot);
-
-	glm::mat4 CalcViewProj();
+	glm::vec3 GetEye() const { return _eye; }
+	glm::vec3 GetTarget() const { return _lookAt; }
 };
