@@ -6,8 +6,8 @@
 //
 struct Material
 {
-	glm::vec3 color;
-	float spec_strength = 1.0f;
-	float amb_strength = 0.2f;
-	float shininess = 32.0f;
+	glm::dvec3 color{ 1.0 };
+	double spec_strength = 1.0;
+	double amb_strength = 0.2;
+	double shininess = 32.0;
 };

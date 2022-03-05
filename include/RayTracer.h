@@ -1,27 +1,35 @@
 #pragma once
 
-#include "Light.h"
-#include "Camera.h"
-#include "Mesh.h"
-
+#include "Scene.h"
 #include "ImageBuffer.h"
 
 #include <cstdint>
+#include <memory>
+
+struct HitResult
+{
+	Triangle triangle;
+	Material material;
+	glm::dvec3 hit_point{0.0};
+	glm::dvec3 bari{0.0};
+	bool hit = false;
+	double distance = 0.0;
+
+public:
+	operator bool() const { return hit; }
+};
 
 class RayTracer
 {
 private:
-	Camera3D *_camera = nullptr;
-	Mesh *_mesh = nullptr;
-	Light *_light = nullptr;
+	std::shared_ptr<Scene> _scene;
 
 public:
-	RayTracer(Light *light, Camera3D *camera, Mesh *mesh);
+	RayTracer(const std::shared_ptr<Scene> &scene);
 
-	// NOTE: Destination assumes RGB_8 format 
-	//
-	void Draw(ImageBuffer &target);
+	void Draw(ImageBuffer &image_buffer);
 
 private:
-	glm::vec3 CastRay(const Ray &ray, Triangle triangles[], std::size_t triangles_count);
+	HitResult RayCast(const Ray &ray, double max_distance);
+	glm::vec3 CalcColor(const Ray &ray);
 };

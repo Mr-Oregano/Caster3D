@@ -1,11 +1,11 @@
 
 #include "Ray.h"
 
-Ray::Ray(glm::vec3 start, glm::vec3 end)
+Ray::Ray(glm::dvec3 start, glm::dvec3 end)
 	: origin(start), dir(glm::normalize(end - start))
 {}
 
-glm::vec3 Ray::GetPoint(float distance)
+glm::dvec3 Ray::GetPoint(double distance) const
 {
 	return origin + distance * dir;
 }

@@ -4,10 +4,10 @@
 
 struct Light
 {
-	glm::vec3 pos;
-	glm::vec3 color;
+	glm::dvec3 pos;
+	glm::dvec3 color;
 
 public:
 	Light() = default;
-	Light(glm::vec3 pos, glm::vec3 color);
+	Light(glm::dvec3 pos, glm::dvec3 color);
 };

@@ -1,6 +1,12 @@
 
 #include "Camera.h"
 
-Camera3D::Camera3D(glm::vec3 eye, glm::vec3 target)
-	: _eye(eye), _lookAt(target)
+#include <iostream>
+
+Camera::Camera(double fov)
+	: _fov(fov)
+{}
+
+Camera::Camera(glm::dvec3 eye, glm::dvec3 target, double fov)
+	: _eye(eye), _target(target), _fov(fov)
 {}

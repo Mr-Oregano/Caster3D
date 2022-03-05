@@ -6,21 +6,12 @@
 
 struct Ray
 {
-	glm::vec3 origin{0.0f};
-	glm::vec3 dir{1.0f};
+	glm::dvec3 origin{ 0.0 };
+	glm::dvec3 dir{ 0.0, 1.0, 0.0 };
 
 public:
 	Ray() = default;
-	Ray(glm::vec3 start, glm::vec3 end);
+	Ray(glm::dvec3 start, glm::dvec3 end);
 
-	glm::vec3 GetPoint(float distance);
-};
-
-struct HitResult
-{
-	Material material;
-	glm::vec3 normal;
-	glm::vec3 hit_point;
-	bool hit = false;
-	float distance = 0.0f;
+	glm::dvec3 GetPoint(double distance) const;
 };
