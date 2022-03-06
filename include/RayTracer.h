@@ -31,5 +31,5 @@ public:
 
 private:
 	HitResult RayCast(const Ray &ray, double max_distance);
-	glm::vec3 CalcColor(const Ray &ray);
+	glm::dvec3 CalcColor(const Ray &ray);
 };

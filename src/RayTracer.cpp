@@ -55,48 +55,50 @@ HitResult RayTracer::RayCast(const Ray &ray, double max_distance)
 	return result;
 }
 
-glm::vec3 RayTracer::CalcColor(const Ray &ray)
+glm::dvec3 RayTracer::CalcColor(const Ray &ray)
 {
 	HitResult result = RayCast(ray, 100.0);
 	
 	if (!result)
 		// NOTE: Raycast failed, return skybox color
 		//
-		return glm::vec3{ 0.0f };
+		return glm::dvec3{ 0.0f };
 
 	Triangle t = result.triangle;
+
+	// NOTE: We need to add a slight bias to the shadow ray origin
+	//		 in order to reduce surface acne.
+	//
+	constexpr double bias = 100.0 * glm::epsilon<double>();
+	glm::dvec3 hit_point = result.hit_point - bias * ray.dir;
+
 	glm::dvec3 output_color{ 0.0 };
 
 	for (const Light &light : _scene->GetLights())
 	{
 		double light_dist = glm::distance(result.hit_point, light.pos);
 		glm::dvec3 light_dir = glm::normalize(light.pos - result.hit_point);
+			
+		double light_factor = glm::dot(t.normal, light_dir);
 		glm::dvec3 phong = PhongShading(light, result.hit_point, t.normal, -ray.dir, result.material) * t.color;
 
-		// NOTE: We need to add a slight bias to the shadow ray origin
-		//		 in order to reduce surface acne.
-		//
-		constexpr double bias = 100.0 * glm::epsilon<double>();
-		Ray shadow_cast(result.hit_point - bias * ray.dir, light.pos);
-
-		bool behind_light = glm::dot(t.normal, light_dir) <= 0.0;
+		Ray shadow_cast(hit_point, light.pos);
 		
 		// NOTE: Short circuit; if the object is behind the light don't waste any effort ray casting.
 		//
+		bool behind_light = light_factor <= 0.0;
 		bool in_shadow = behind_light || RayCast(shadow_cast, 100.0).distance < light_dist;
 		double shadow = in_shadow ? 0.3 : 1.0;
 
 		output_color += phong * shadow;
 	}
 
-	return output_color / (double) _scene->GetLights().size();
+	return output_color / (double)_scene->GetLights().size();
 }
 
 void RayTracer::Draw(ImageBuffer &image_buffer)
 {
 	auto [ width, height ] = image_buffer.GetExtent();
-	std::uint8_t px_stride = image_buffer.GetBytesPerPixel();
-
 	const Camera &cam = _scene->GetCamera();
 
 	double distance = 1.0 / glm::tan(glm::radians(cam.GetFOV() / 2.0));
@@ -108,10 +110,10 @@ void RayTracer::Draw(ImageBuffer &image_buffer)
 	glm::dvec3 qy = (2.0 / height) * v;
 	glm::dvec3 plm = t * distance - b - v;
 
-	for (std::uint32_t i = 0; i < image_buffer.GetBufferSize(); i += px_stride)
+	for (std::uint32_t i = 0; i < width * height; ++i)
 	{
-		double x = (i / px_stride) % width;
-		double y = (i / px_stride) / width;
+		double x = i % width;
+		double y = i / width;
 
 		Ray ray;
 		ray.origin = cam.GetEye();

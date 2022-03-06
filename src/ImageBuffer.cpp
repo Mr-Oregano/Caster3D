@@ -27,6 +27,7 @@ void ImageBuffer::WritePixel(std::uint32_t px_i, double r, double g, double b)
 	g = glm::clamp(g, 0.0, 1.0);
 	b = glm::clamp(b, 0.0, 1.0);
 
+	px_i *= 3;
 	_buffer[px_i + 0] = (int)(r * 255);
 	_buffer[px_i + 1] = (int)(g * 255);
 	_buffer[px_i + 2] = (int)(b * 255);
