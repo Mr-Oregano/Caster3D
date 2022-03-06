@@ -40,7 +40,7 @@ HitResult RayTracer::RayCast(const Ray &ray, double max_distance)
 			double distance = max_distance;
 			bool raycast_hit = glm::intersectRayTriangle(ray.origin, ray.dir, t.v0, t.v1, t.v2, bari_center, distance);
 			
-			if (raycast_hit && 0.0 < distance && distance < result.distance)
+			if (raycast_hit && glm::zero<double>() < distance && distance < result.distance)
 			{
 				result.triangle = t;
 				result.material = m->GetMaterial();
@@ -74,14 +74,18 @@ glm::vec3 RayTracer::CalcColor(const Ray &ray)
 		glm::dvec3 phong = PhongShading(light, result.hit_point, t.normal, -ray.dir, result.material) * t.color;
 
 		// NOTE: We need to add a slight bias to the shadow ray origin
-		//		 in order to reduce shadow acne.
+		//		 in order to reduce surface acne.
 		//
 		constexpr double bias = 100.0 * glm::epsilon<double>();
-		HitResult result2 = RayCast(Ray(result.hit_point - bias * ray.dir, light.pos), 100.0);
+		Ray shadow_cast(result.hit_point - bias * ray.dir, light.pos);
+
+		bool behind_light = glm::dot(t.normal, light_dir) <= 0.0;
 		
-		bool behind_light = glm::dot(t.normal, light_dir) < 0.0;
-		bool shadow_hit = result2.distance < light_dist;
-		double shadow = behind_light || shadow_hit ? 0.3 : 1.0;
+		// NOTE: Short circuit; if the object is behind the light don't waste any effort ray casting.
+		//
+		bool in_shadow = behind_light || RayCast(shadow_cast, 100.0).distance < light_dist;
+		double shadow = in_shadow ? 0.3 : 1.0;
+
 		output_color += phong * shadow;
 	}
 
