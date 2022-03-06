@@ -8,6 +8,14 @@ workspace "Caster3D"
 		"Release"
 	}
 
+	filter "configurations:Debug"
+		optimize "off"
+		symbols "on"
+
+	filter "configurations:Release"
+		optimize "speed"
+		symbols "off"
+
 group "Dependencies"
 	include "vendor/stb"
 group ""
