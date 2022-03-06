@@ -11,17 +11,6 @@ RayTracer::RayTracer(const std::shared_ptr<Scene> &scene)
 	: _scene(scene)
 {}
 
-glm::dvec3 PhongShading(const Light &light, glm::dvec3 loc, glm::dvec3 n, glm::dvec3 view_dir, const Material &mat)
-{
-	glm::dvec3 light_dir = glm::normalize(light.pos - loc);
-	glm::dvec3 reflected_light = glm::reflect(-light_dir, n);
-
-	double diff = glm::max(glm::dot(n, light_dir), 0.0);
-	double spec = glm::max(glm::dot(view_dir, reflected_light), 0.0);
-
-	return (mat.spec_strength * glm::pow(spec, mat.shininess) + diff + mat.amb_strength) * light.color * mat.color;
-}
-
 HitResult RayTracer::RayCast(const Ray &ray, double max_distance)
 {
 	HitResult result;
@@ -55,45 +44,51 @@ HitResult RayTracer::RayCast(const Ray &ray, double max_distance)
 	return result;
 }
 
-glm::dvec3 RayTracer::CalcColor(const Ray &ray)
+glm::dvec3 RayTracer::CalcColor(const Ray &ray, int max_bounces)
 {
 	HitResult result = RayCast(ray, 100.0);
 	
 	if (!result)
 		// NOTE: Raycast failed, return skybox color
 		//
-		return glm::dvec3{ 0.0f };
+		return glm::dvec3{ 0.0 };
 
-	Triangle t = result.triangle;
-
+	glm::dvec3 color = result.material.color * result.triangle.color;
+	
 	// NOTE: We need to add a slight bias to the shadow ray origin
 	//		 in order to reduce surface acne.
 	//
-	constexpr double bias = 100.0 * glm::epsilon<double>();
-	glm::dvec3 hit_point = result.hit_point - bias * ray.dir;
-
-	glm::dvec3 output_color{ 0.0 };
+	constexpr double bias = 0.001;
+	glm::dvec3 new_origin = result.hit_point - bias * ray.dir;
+	glm::dvec3 light_contribution{ 0.0 };
 
 	for (const Light &light : _scene->GetLights())
 	{
 		double light_dist = glm::distance(result.hit_point, light.pos);
 		glm::dvec3 light_dir = glm::normalize(light.pos - result.hit_point);
-			
-		double light_factor = glm::dot(t.normal, light_dir);
-		glm::dvec3 phong = PhongShading(light, result.hit_point, t.normal, -ray.dir, result.material) * t.color;
+		double light_factor = glm::dot(result.triangle.normal, light_dir);
 
-		Ray shadow_cast(hit_point, light.pos);
-		
+		bool behind_light = light_factor <= 0.0;
+		Ray shadow_cast(new_origin, light.pos);
+
 		// NOTE: Short circuit; if the object is behind the light don't waste any effort ray casting.
 		//
-		bool behind_light = light_factor <= 0.0;
-		bool in_shadow = behind_light || RayCast(shadow_cast, 100.0).distance < light_dist;
-		double shadow = in_shadow ? 0.3 : 1.0;
-
-		output_color += phong * shadow;
+		if (!behind_light && RayCast(shadow_cast, 100.0).distance >= light_dist)
+			light_contribution += light.color * light_factor;
 	}
 
-	return output_color / (double)_scene->GetLights().size();
+	light_contribution /= _scene->GetLights().size();
+
+	if (max_bounces > 0 && result.material.reflection > 0.0)
+	{
+		Ray reflection_cast;
+		reflection_cast.origin = new_origin;
+		reflection_cast.dir = glm::reflect(ray.dir, result.triangle.normal);
+		glm::dvec3 reflection = CalcColor(reflection_cast, max_bounces - 1);
+		return glm::mix(color * light_contribution, reflection, result.material.reflection);
+	}
+
+	return color * light_contribution;
 }
 
 void RayTracer::Draw(ImageBuffer &image_buffer)
@@ -119,7 +114,7 @@ void RayTracer::Draw(ImageBuffer &image_buffer)
 		ray.origin = cam.GetEye();
 		ray.dir = glm::normalize(plm + qx * x + qy * y);
 
-		glm::dvec3 color = CalcColor(ray);
+		glm::dvec3 color = CalcColor(ray, 16);
 
 		image_buffer.WritePixel(i, color.r, color.g, color.b);
 	}
