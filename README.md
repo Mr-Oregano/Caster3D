@@ -2,7 +2,7 @@
 CPU raytracer written in C++.
 
 # Demo
-![out](https://user-images.githubusercontent.com/33503562/156872658-84bbb7b4-dd40-4e7c-8997-8f08c8592b68.png)
+![out](https://user-images.githubusercontent.com/33503562/156945260-eb0c2a75-e804-407a-a57f-9ce2b7748d24.png)
 
 
 # Build
