@@ -21,13 +21,16 @@ std::shared_ptr<Scene> GenerateScene()
 {
 	std::shared_ptr<Scene> scene = std::make_shared<Scene>();
 
-	scene->AddLight(Light{ glm::dvec3{  -2.0,  5.5,  1.0 }, glm::dvec3{ 1.0 } });
-	scene->AddLight(Light{ glm::dvec3{  12.0, 7.5, -10.0 }, glm::dvec3{ 0.2, 1.0, 0.4 } });
-	scene->AddLight(Light{ glm::dvec3{ -3.0,  5.5, -5.0 }, glm::dvec3{ 0.3, 0.1, 1.0 } });
+	scene->AddLight(Light{ glm::dvec3{  -2.0,  5.5,  1.0 }, glm::dvec3{ 1.0 }, 11.0 });
+	scene->AddLight(Light{ glm::dvec3{  12.0, 7.5, -10.0 }, glm::dvec3{ 0.5, 1.0, 0.4 }, 100.0 });
+	scene->AddLight(Light{ glm::dvec3{ -0.75,  0.5, 0.0 }, glm::dvec3{ 0.3, 0.1, 1.0 }, 5.0 });
 
 	Material cube_material;
 	cube_material.color = glm::vec3{ 1.0f, 1.0f, 1.0f };
-	cube_material.reflection = 0.7;
+	cube_material.reflection = 0.75;
+	cube_material.diffuse = 1.0;
+	cube_material.specular = 1.0;
+	cube_material.shine = 64.0;
 
 	Triangle cube_triangles[12];
 
@@ -111,17 +114,13 @@ std::shared_ptr<Scene> GenerateScene()
 
 	std::shared_ptr<Mesh> cube1 = std::make_shared<Mesh>(cube_triangles, std::size(cube_triangles), cube_material);
 
-	cube_material.reflection = 0.1;
-	std::shared_ptr<Mesh> cube2 = std::make_shared<Mesh>(cube_triangles, std::size(cube_triangles), cube_material);
-
 	cube_material.reflection = 0.0;
+	std::shared_ptr<Mesh> cube2 = std::make_shared<Mesh>(cube_triangles, std::size(cube_triangles), cube_material);
 	std::shared_ptr<Mesh> cube3 = std::make_shared<Mesh>(cube_triangles, std::size(cube_triangles), cube_material);
-
-	cube_material.reflection = 0.2;
 	std::shared_ptr<Mesh> cube4 = std::make_shared<Mesh>(cube_triangles, std::size(cube_triangles), cube_material);
 	
-	cube2->RotateX(45.0);
-	cube2->Translate({ 0.5, 0.5, -1.5 });
+	cube2->RotateX(-35.0);
+	cube2->Translate({ 0.5, 1.0, -1.5 });
 	
 	cube3->RotateY(45.0);
 	cube3->Translate({ -1.5, -0.5, -0.5 });
@@ -139,6 +138,8 @@ std::shared_ptr<Scene> GenerateScene()
 	Material plane_material;
 	plane_material.color = { 1.0, 1.0, 1.0 };
 	plane_material.reflection = 0.0;
+	plane_material.diffuse = 1.0;
+	plane_material.specular = 0.0;
 
 	Triangle plane_triangles[2];
 

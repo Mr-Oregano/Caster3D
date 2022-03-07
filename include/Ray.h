@@ -11,7 +11,7 @@ struct Ray
 
 public:
 	Ray() = default;
-	Ray(glm::dvec3 start, glm::dvec3 end);
+	Ray(glm::dvec3 origin, glm::dvec3 dir);
 
 	glm::dvec3 GetPoint(double distance) const;
 };
