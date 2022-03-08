@@ -172,7 +172,7 @@ int main()
 
 	ImageBuffer target(1920, 1920);
 
-	tracer.Draw(target);
+	tracer.Draw(target, 2);
 
 	WriteOutput("./output/out.png", target);
 }

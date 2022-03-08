@@ -13,7 +13,7 @@ private:
 
 public:
 	RayTracer(const std::shared_ptr<Scene> &scene);
-	void Draw(ImageBuffer &image_buffer);
+	void Draw(ImageBuffer &image_buffer, int samples = 1);
 
 private:
 	glm::dvec3 CalcColor(const Ray &ray, int max_bounces);

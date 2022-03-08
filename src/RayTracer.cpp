@@ -60,7 +60,7 @@ glm::dvec3 RayTracer::CalcColor(const Ray &ray, int max_bounces)
 	return color;
 }
 
-void RayTracer::Draw(ImageBuffer &image_buffer)
+void RayTracer::Draw(ImageBuffer &image_buffer, int samples)
 {
 	auto [ width, height ] = image_buffer.GetExtent();
 	const Camera &cam = _scene->GetCamera();
@@ -74,13 +74,24 @@ void RayTracer::Draw(ImageBuffer &image_buffer)
 	glm::dvec3 qy = (2.0 / height) * v;
 	glm::dvec3 bottom_left = t * distance - b - v;
 
+	int samples_sqr = samples * samples;
+
 	for (std::uint32_t i = 0; i < width * height; ++i)
 	{
-		double x = i % width;
-		double y = i / width;
+		glm::dvec3 color{ 0.0 };
 
-		Ray ray(cam.GetEye(), glm::normalize(bottom_left + qx * x + qy * y));
-		glm::dvec3 color = CalcColor(ray, 16);
+		for (int s = 0; s < samples_sqr; ++s)
+		{
+			double sx = (double) (s % samples) / samples;
+			double sy = (double) (s / samples) / samples;
+			double x = (double) (i % width) + sx;
+			double y = (double) (i / width) + sy;
+
+			Ray ray(cam.GetEye(), glm::normalize(bottom_left + qx * x + qy * y));
+			color += CalcColor(ray, 16);
+		}
+
+		color /= samples_sqr;
 
 		image_buffer.WritePixel(i, color.r, color.g, color.b);
 	}
