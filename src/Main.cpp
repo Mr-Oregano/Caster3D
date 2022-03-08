@@ -21,9 +21,9 @@ std::shared_ptr<Scene> GenerateScene()
 {
 	std::shared_ptr<Scene> scene = std::make_shared<Scene>();
 
-	scene->AddLight(Light{ glm::dvec3{  -2.0,  5.5,  1.0 }, glm::dvec3{ 1.0 }, 11.0 });
-	scene->AddLight(Light{ glm::dvec3{  12.0, 7.5, -10.0 }, glm::dvec3{ 0.5, 1.0, 0.4 }, 100.0 });
-	scene->AddLight(Light{ glm::dvec3{ -0.75,  0.5, 0.0 }, glm::dvec3{ 0.3, 0.1, 1.0 }, 5.0 });
+	scene->AddDirLight(DirectionalLight{ glm::dvec3{  -1.0,  -1.0,  -1.0 }, glm::dvec3{ 1.0 } });
+	scene->AddPointLight(PointLight{ glm::dvec3{  12.0, 7.5, -10.0 }, glm::dvec3{ 0.5, 1.0, 0.4 }, 100.0 });
+	scene->AddPointLight(PointLight{ glm::dvec3{ -0.75,  0.5, 0.0 }, glm::dvec3{ 0.3, 0.1, 1.0 }, 5.0 });
 
 	Material cube_material;
 	cube_material.color = glm::vec3{ 1.0f, 1.0f, 1.0f };

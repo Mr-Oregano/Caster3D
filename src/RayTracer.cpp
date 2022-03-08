@@ -5,53 +5,18 @@
 #include "Triangle.h"
 #include "Material.h"
 
-#include <glm/gtx/intersect.hpp>
-
 RayTracer::RayTracer(const std::shared_ptr<Scene> &scene)
 	: _scene(scene)
 {}
 
-HitResult RayTracer::RayCast(const Ray &ray, double max_distance)
-{
-	HitResult result;
-	result.distance = max_distance;
-
-	// NOTE: Traverse all triangle lists in scene and find the raycast hit with 
-	//		 smallest distance.
-	// 
-	// TODO: Use bounding volume hierarchy to make this more efficient.
-	//
-	for (const auto &m : _scene->GetMeshes())
-	{
-		for (const Triangle &t : m->GetTriangleList())
-		{
-			glm::dvec2 bari_center;           
-			double distance = max_distance;
-			bool raycast_hit = glm::intersectRayTriangle(ray.origin, ray.dir, t.v0, t.v1, t.v2, bari_center, distance);
-			
-			if (raycast_hit && glm::zero<double>() < distance && distance < result.distance)
-			{
-				result.triangle = t;
-				result.material = m->GetMaterial();
-				result.distance = distance;
-				result.hit_point = ray.GetPoint(distance);
-				result.bari = glm::vec3 { bari_center, 1.0f - bari_center.x - bari_center.y };
-				result.hit = true;
-			}
-		}
-	}
-	
-	return result;
-}
-
 glm::dvec3 RayTracer::CalcColor(const Ray &ray, int max_bounces)
 {
-	HitResult result = RayCast(ray, 100.0);
+	HitResult result = _scene->RayCast(ray, 100.0);
 	
 	if (!result)
 		// NOTE: Raycast failed, return skybox color
 		//
-		return glm::dvec3{ 0.0 };
+		return glm::dvec3{ 0.5, 0.9, 1.0 };
 
 	Material m = result.material;
 	Triangle t = result.triangle;
@@ -63,27 +28,26 @@ glm::dvec3 RayTracer::CalcColor(const Ray &ray, int max_bounces)
 	glm::dvec3 new_origin = result.hit_point - bias * ray.dir;
 	glm::dvec3 color{ 0.0 };
 
-	for (const Light &light : _scene->GetLights())
+	for (const auto &light : _scene->GetPointLights())
 	{
-		double light_dist = glm::distance(result.hit_point, light.pos);
-		glm::dvec3 light_dir = glm::normalize(light.pos - result.hit_point);
-		glm::dvec3 light_reflected = glm::reflect(light_dir, t.normal);
-		
-		double light_contribution = glm::dot(t.normal, light_dir);
-		double diffuse = glm::max(light_contribution, 0.0);
-		double specular = glm::max(glm::dot(-ray.dir, light_reflected), 0.0);
-		double attenuation = light.brightness / (1.0 + light_dist * light_dist);
+		glm::dvec3 light_dir = light.CalcDir(result.hit_point);
 
-		double light_output = diffuse * m.diffuse + glm::pow(specular, m.shine) * m.specular;
-		light_output *= attenuation;
+		if (glm::dot(t.normal, light_dir) <= 0.0)
+			continue;
 
-		bool behind_light = light_contribution <= 0.0;
 		Ray shadow_cast(new_origin, light_dir);
+		if (_scene->RayCast(shadow_cast, 100.0).distance >= light.CalcDistance(result.hit_point))
+			color += light.CalcContribution(result.hit_point, -ray.dir, t.normal, m) * m.color * t.color;
+	}
 
-		// NOTE: Short circuit; if the object is behind the light don't waste any effort ray casting.
-		//
-		if (!behind_light && RayCast(shadow_cast, 100.0).distance >= light_dist)
-			color += m.color * t.color * light.color * light_output;
+	for (const auto &light : _scene->GetDirLights())
+	{
+		if (glm::dot(t.normal, -light.dir) <= 0.0)
+			continue;
+
+		Ray shadow_cast(new_origin, -light.dir);
+		if (!_scene->RayCast(shadow_cast, 100.0))
+			color += light.CalcContribution(result.hit_point, -ray.dir, t.normal, m) * m.color * t.color;
 	}
 
 	if (max_bounces > 0 && m.reflection > 0.0)
