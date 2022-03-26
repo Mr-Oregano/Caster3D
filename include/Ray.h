@@ -1,17 +1,15 @@
 #pragma once
 
-#include <glm/glm.hpp>
-
-#include "Material.h"
+#include "Maths.h"
 
 struct Ray
 {
-	glm::dvec3 origin{ 0.0 };
-	glm::dvec3 dir{ 0.0, 1.0, 0.0 };
+	Vec3 origin{ 0.0 };
+	Vec3 dir{ 0.0, 1.0, 0.0 };
 
 public:
 	Ray() = default;
-	Ray(glm::dvec3 origin, glm::dvec3 dir);
+	Ray(Vec3 origin, Vec3 dir);
 
-	glm::dvec3 GetPoint(double distance) const;
+	Vec3 GetPoint(double distance) const;
 };

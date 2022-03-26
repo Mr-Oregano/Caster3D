@@ -9,10 +9,10 @@ struct Triangle
 {
 	union 
 	{
-		struct { glm::dvec3 v0, v1, v2; };
-		glm::dvec3 v[3];
+		struct { Vec3 v0, v1, v2; };
+		Vec3 v[3];
 	};
 	
-	glm::dvec3 normal{ 1.0f };
-	glm::dvec3 color{ 1.0f };
+	Vec3 normal{ 1.0f };
+	Color color{ 1.0f };
 };

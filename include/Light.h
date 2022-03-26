@@ -2,29 +2,29 @@
 
 #include "Material.h"
 
-#include <glm/glm.hpp>
+#include "Maths.h"
 
 struct PointLight
 {
-	glm::dvec3 pos;
-	glm::dvec3 color;
+	Vec3 pos;
+	Color color;
 	double brightness;
 
 public:
-	PointLight(glm::dvec3 pos, glm::dvec3 color, double brightness = 1.0);
+	PointLight(Vec3 pos, Color color, double brightness = 1.0);
 
-	glm::dvec3 CalcContribution(glm::dvec3 loc, glm::dvec3 view, glm::dvec3 normal, const Material &m) const;
-	glm::dvec3 CalcDir(glm::dvec3 loc) const;
-	double CalcDistance(glm::dvec3 loc) const;
+	Color CalcContribution(Vec3 loc, Vec3 view, Vec3 normal, const Material &m) const;
+	Vec3 CalcDir(Vec3 loc) const;
+	double CalcDistance(Vec3 loc) const;
 };
 
 struct DirectionalLight
 {
-	glm::dvec3 dir;
-	glm::dvec3 color;
+	Vec3 dir;
+	Color color;
 
 public:
-	DirectionalLight(glm::dvec3 dir, glm::dvec3 color);
+	DirectionalLight(Vec3 dir, Color color);
 
-	glm::dvec3 CalcContribution(glm::dvec3 loc, glm::dvec3 view, glm::dvec3 normal, const Material &m) const;
+	Color CalcContribution(Vec3 loc, Vec3 view, Vec3 normal, const Material &m) const;
 };

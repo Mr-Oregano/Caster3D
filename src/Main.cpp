@@ -21,12 +21,12 @@ std::shared_ptr<Scene> GenerateScene()
 {
 	std::shared_ptr<Scene> scene = std::make_shared<Scene>();
 
-	scene->AddDirLight(DirectionalLight{ glm::dvec3{  -1.0,  -1.0,  -1.0 }, glm::dvec3{ 1.0 } });
-	scene->AddPointLight(PointLight{ glm::dvec3{  12.0, 7.5, -10.0 }, glm::dvec3{ 0.5, 1.0, 0.4 }, 100.0 });
-	scene->AddPointLight(PointLight{ glm::dvec3{ -0.75,  0.5, 0.0 }, glm::dvec3{ 0.3, 0.1, 1.0 }, 5.0 });
+	scene->AddDirLight(DirectionalLight{ Vec3{  -1.0,  -1.0,  -1.0 }, Vec3{ 1.0 } });
+	scene->AddPointLight(PointLight{ Vec3{  12.0, 7.5, -10.0 }, Vec3{ 0.5, 1.0, 0.4 }, 100.0 });
+	scene->AddPointLight(PointLight{ Vec3{ -0.75,  0.5, 0.0 }, Vec3{ 0.3, 0.1, 1.0 }, 5.0 });
 
 	Material cube_material;
-	cube_material.color = glm::vec3{ 1.0f, 1.0f, 1.0f };
+	cube_material.color = { 1.0f, 1.0f, 1.0f };
 	cube_material.reflection = 0.75;
 	cube_material.diffuse = 1.0;
 	cube_material.specular = 1.0;
@@ -155,13 +155,13 @@ std::shared_ptr<Scene> GenerateScene()
 
 	std::shared_ptr<Mesh> plane = std::make_shared<Mesh>(plane_triangles, std::size(plane_triangles), plane_material);
 	
-	plane->Scale(glm::dvec3{ 1000.0 });
+	plane->Scale(Vec3{ 1000.0 });
 	plane->Translate({ 0.0, -0.5, 0.0 });
 
 	scene->AddMesh(plane);
 
 	Camera &cam = scene->GetCamera();
-	cam.Translate(glm::dvec3{ -2.0, 2.0, 2.0 });
+	cam.Translate(Vec3{ -2.0, 2.0, 2.0 });
 
 	return scene;
 }

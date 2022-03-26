@@ -2,6 +2,7 @@
 
 #include "Scene.h"
 #include "ImageBuffer.h"
+#include "Maths.h"
 
 #include <cstdint>
 #include <memory>
@@ -16,5 +17,5 @@ public:
 	void Draw(ImageBuffer &image_buffer, int samples = 1);
 
 private:
-	glm::dvec3 CalcColor(const Ray &ray, int max_bounces);
+	Color CalcColor(const Ray &ray, int max_bounces);
 };

@@ -11,19 +11,13 @@ struct HitResult
 {
 	Triangle triangle;
 	Material material;
-	glm::dvec3 hit_point{ 0.0 };
-	glm::dvec3 bari{ 0.0 };
+	Vec3 hit_point{ 0.0 };
+	Vec3 bari{ 0.0 };
 	bool hit = false;
 	double distance = 0.0;
 
 public:
 	operator bool() const { return hit; }
-};
-
-struct LightResult
-{
-	glm::dvec3 ambient;
-	glm::dvec3 specular;
 };
 
 class Scene

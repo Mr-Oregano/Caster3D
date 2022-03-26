@@ -1,8 +1,6 @@
 
 #include "Scene.h"
 
-#include <glm/gtx/intersect.hpp>
-
 void Scene::AddMesh(const std::shared_ptr<Mesh> &mesh)
 {
 	_meshes.push_back(mesh);
@@ -32,7 +30,7 @@ HitResult Scene::RayCast(const Ray &ray, double max_distance)
 	{
 		for (const Triangle &t : m->GetTriangleList())
 		{
-			glm::dvec2 bari_center;
+			Vec2 bari_center;
 			double distance = max_distance;
 			bool raycast_hit = glm::intersectRayTriangle(ray.origin, ray.dir, t.v0, t.v1, t.v2, bari_center, distance);
 
@@ -42,7 +40,7 @@ HitResult Scene::RayCast(const Ray &ray, double max_distance)
 				result.material = m->GetMaterial();
 				result.distance = distance;
 				result.hit_point = ray.GetPoint(distance);
-				result.bari = glm::vec3{ bari_center, 1.0f - bari_center.x - bari_center.y };
+				result.bari = Vec3{ bari_center, 1.0f - bari_center.x - bari_center.y };
 				result.hit = true;
 			}
 		}

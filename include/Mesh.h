@@ -1,10 +1,9 @@
 #pragma once
 
-#include <Triangle.h>
+#include "Triangle.h"
+#include "Maths.h"
 
 #include <vector>
-
-#include <glm/glm.hpp>
 
 class Mesh
 {
@@ -16,10 +15,10 @@ public:
 	Mesh(const Triangle triangles[], std::size_t count, const Material &material);
 	virtual ~Mesh() = default;
 
-	void Transform(const glm::mat4 &model);
-	void Translate(const glm::dvec3 &pos);
-	void Scale(const glm::dvec3 &scale);
-	void Rotate(double degrees, const glm::dvec3 &axis);
+	void Transform(const Mat4 &model);
+	void Translate(const Vec3 &pos);
+	void Scale(const Vec3 &scale);
+	void Rotate(double degrees, const Vec3 &axis);
 	void RotateX(double degrees);
 	void RotateY(double degrees);
 	void RotateZ(double degrees);

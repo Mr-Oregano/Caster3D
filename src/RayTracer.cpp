@@ -9,14 +9,14 @@ RayTracer::RayTracer(const std::shared_ptr<Scene> &scene)
 	: _scene(scene)
 {}
 
-glm::dvec3 RayTracer::CalcColor(const Ray &ray, int max_bounces)
+Color RayTracer::CalcColor(const Ray &ray, int max_bounces)
 {
 	HitResult result = _scene->RayCast(ray, 100.0);
 	
 	if (!result)
 		// NOTE: Raycast failed, return skybox color
 		//
-		return glm::dvec3{ 0.5, 0.9, 1.0 };
+		return { 0.5, 0.9, 1.0 };
 
 	Material m = result.material;
 	Triangle t = result.triangle;
@@ -25,12 +25,12 @@ glm::dvec3 RayTracer::CalcColor(const Ray &ray, int max_bounces)
 	//		 in order to reduce surface acne.
 	//
 	constexpr double bias = 0.001;
-	glm::dvec3 new_origin = result.hit_point - bias * ray.dir;
-	glm::dvec3 color{ 0.0 };
+	Vec3 new_origin = result.hit_point - bias * ray.dir;
+	Color color{ 0.0 };
 
 	for (const auto &light : _scene->GetPointLights())
 	{
-		glm::dvec3 light_dir = light.CalcDir(result.hit_point);
+		Vec3 light_dir = light.CalcDir(result.hit_point);
 
 		if (glm::dot(t.normal, light_dir) <= 0.0)
 			continue;
@@ -53,7 +53,7 @@ glm::dvec3 RayTracer::CalcColor(const Ray &ray, int max_bounces)
 	if (max_bounces > 0 && m.reflection > 0.0)
 	{
 		Ray reflection_cast(new_origin, glm::reflect(ray.dir, t.normal));
-		glm::dvec3 reflection = CalcColor(reflection_cast, max_bounces - 1);
+		Color reflection = CalcColor(reflection_cast, max_bounces - 1);
 		return glm::mix(color, reflection, m.reflection);
 	}
 
@@ -66,19 +66,19 @@ void RayTracer::Draw(ImageBuffer &image_buffer, int samples)
 	const Camera &cam = _scene->GetCamera();
 
 	double distance = 1.0 / glm::tan(glm::radians(cam.GetFOV() / 2.0));
-	glm::dvec3 t = glm::normalize(cam.GetTarget() - cam.GetEye());
-	glm::dvec3 b = glm::cross(t, cam.GetUp());
-	glm::dvec3 v = glm::cross(t, b);
+	Vec3 t = glm::normalize(cam.GetTarget() - cam.GetEye());
+	Vec3 b = glm::cross(t, cam.GetUp());
+	Vec3 v = glm::cross(t, b);
 
-	glm::dvec3 qx = (2.0 / width) * b;
-	glm::dvec3 qy = (2.0 / height) * v;
-	glm::dvec3 bottom_left = t * distance - b - v;
+	Vec3 qx = (2.0 / width) * b;
+	Vec3 qy = (2.0 / height) * v;
+	Vec3 bottom_left = t * distance - b - v;
 
 	int samples_sqr = samples * samples;
 
 	for (std::uint32_t i = 0; i < width * height; ++i)
 	{
-		glm::dvec3 color{ 0.0 };
+		Color color{ 0.0 };
 
 		for (int s = 0; s < samples_sqr; ++s)
 		{

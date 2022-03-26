@@ -1,7 +1,7 @@
 
 #include "ImageBuffer.h"
 
-#include <glm/glm.hpp>
+#include "Maths.h"
 
 ImageBuffer::ImageBuffer(std::uint32_t width, std::uint32_t height)
 	: _width(width), _height(height)

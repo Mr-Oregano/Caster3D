@@ -1,17 +1,15 @@
 
 #include "Light.h"
 
-#include <glm/ext.hpp>
-
-PointLight::PointLight(glm::dvec3 pos, glm::dvec3 color, double brightness)
+PointLight::PointLight(Vec3 pos, Color color, double brightness)
 	: pos(pos), color(color), brightness(brightness)
 {}
 
-glm::dvec3 PointLight::CalcContribution(glm::dvec3 loc, glm::dvec3 view, glm::dvec3 normal, const Material &m) const
+Color PointLight::CalcContribution(Vec3 loc, Vec3 view, Vec3 normal, const Material &m) const
 {
 	double light_dist = CalcDistance(loc);
-	glm::dvec3 light_dir = CalcDir(loc);
-	glm::dvec3 light_reflected = glm::reflect(light_dir, normal);
+	Vec3 light_dir = CalcDir(loc);
+	Vec3 light_reflected = glm::reflect(light_dir, normal);
 
 	double light_contribution = glm::dot(normal, light_dir);
 	double diffuse = glm::max(light_contribution, 0.0);
@@ -22,23 +20,23 @@ glm::dvec3 PointLight::CalcContribution(glm::dvec3 loc, glm::dvec3 view, glm::dv
 	return color * output * attenuation;
 }
 
-glm::dvec3 PointLight::CalcDir(glm::dvec3 loc) const
+Vec3 PointLight::CalcDir(Vec3 loc) const
 {
 	return glm::normalize(pos - loc);
 }
 
-double PointLight::CalcDistance(glm::dvec3 loc) const
+double PointLight::CalcDistance(Vec3 loc) const
 {
 	return glm::distance(loc, pos);
 }
 
-DirectionalLight::DirectionalLight(glm::dvec3 dir, glm::dvec3 color)
+DirectionalLight::DirectionalLight(Vec3 dir, Color color)
 	: dir(glm::normalize(dir)), color(color)
 {}
 
-glm::dvec3 DirectionalLight::CalcContribution(glm::dvec3 loc, glm::dvec3 view, glm::dvec3 normal, const Material &m) const
+Color DirectionalLight::CalcContribution(Vec3 loc, Vec3 view, Vec3 normal, const Material &m) const
 {
-	glm::dvec3 light_reflected = glm::reflect(-dir, normal);
+	Vec3 light_reflected = glm::reflect(-dir, normal);
 	double light_contribution = glm::dot(normal, -dir);
 
 	double diffuse = glm::max(light_contribution, 0.0);
