@@ -16,7 +16,7 @@ Color PointLight::CalcContribution(Vec3 loc, Vec3 view, Vec3 normal, const Mater
 	double specular = glm::max(glm::dot(view, light_reflected), 0.0);
 	double attenuation = brightness / (1.0 + light_dist * light_dist);
 
-	double output = diffuse * m.diffuse + glm::pow(specular, m.shine) * m.specular;
+	double output = diffuse * m.diffuse + glm::pow(specular, m.shine) * m.reflection;
 	return color * output * attenuation;
 }
 
@@ -42,6 +42,6 @@ Color DirectionalLight::CalcContribution(Vec3 loc, Vec3 view, Vec3 normal, const
 	double diffuse = glm::max(light_contribution, 0.0);
 	double specular = glm::max(glm::dot(view, light_reflected), 0.0);
 
-	double output = diffuse * m.diffuse + glm::pow(specular, m.shine) * m.specular;
+	double output = diffuse * m.diffuse + glm::pow(specular, m.shine) * m.reflection;
 	return color * output;
 }

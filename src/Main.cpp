@@ -23,14 +23,15 @@ std::shared_ptr<Scene> GenerateScene()
 
 	scene->AddDirLight(DirectionalLight{ Vec3{  -1.0,  -1.0,  -1.0 }, Vec3{ 1.0 } });
 	scene->AddPointLight(PointLight{ Vec3{  12.0, 7.5, -10.0 }, Vec3{ 0.5, 1.0, 0.4 }, 100.0 });
-	scene->AddPointLight(PointLight{ Vec3{ -0.75,  0.5, 0.0 }, Vec3{ 0.3, 0.1, 1.0 }, 5.0 });
+	scene->AddPointLight(PointLight{ Vec3{ 0.75,  0.5, 0.0 }, Vec3{ 0.3, 0.1, 1.0 }, 5.0 });
 
 	Material cube_material;
 	cube_material.color = { 1.0f, 1.0f, 1.0f };
-	cube_material.reflection = 0.75;
+	cube_material.reflection = 0.5;
 	cube_material.diffuse = 1.0;
-	cube_material.specular = 1.0;
 	cube_material.shine = 64.0;
+	cube_material.transmission = 0.8;
+	cube_material.refractive_index = 1.125;
 
 	Triangle cube_triangles[12];
 
@@ -115,10 +116,22 @@ std::shared_ptr<Scene> GenerateScene()
 	std::shared_ptr<Mesh> cube1 = std::make_shared<Mesh>(cube_triangles, std::size(cube_triangles), cube_material);
 
 	cube_material.reflection = 0.0;
+	cube_material.transmission = 0.0;
+
 	std::shared_ptr<Mesh> cube2 = std::make_shared<Mesh>(cube_triangles, std::size(cube_triangles), cube_material);
+
+	cube_material.reflection = 0.5;
+	cube_material.transmission = 0.0;
+
 	std::shared_ptr<Mesh> cube3 = std::make_shared<Mesh>(cube_triangles, std::size(cube_triangles), cube_material);
+
+	cube_material.reflection = 0.25;
+	cube_material.transmission = 0.0;
+
 	std::shared_ptr<Mesh> cube4 = std::make_shared<Mesh>(cube_triangles, std::size(cube_triangles), cube_material);
 	
+	cube1->Translate({ 0.0, 0.01, 0.0 });
+
 	cube2->RotateX(-35.0);
 	cube2->Translate({ 0.5, 1.0, -1.5 });
 	
@@ -139,7 +152,6 @@ std::shared_ptr<Scene> GenerateScene()
 	plane_material.color = { 1.0, 1.0, 1.0 };
 	plane_material.reflection = 0.0;
 	plane_material.diffuse = 1.0;
-	plane_material.specular = 0.0;
 
 	Triangle plane_triangles[2];
 
@@ -161,7 +173,7 @@ std::shared_ptr<Scene> GenerateScene()
 	scene->AddMesh(plane);
 
 	Camera &cam = scene->GetCamera();
-	cam.Translate(Vec3{ -2.0, 2.0, 2.0 });
+	cam.Translate(Vec3{ 0.25, 0.5, 2.0 });
 
 	return scene;
 }
