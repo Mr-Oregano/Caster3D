@@ -7,7 +7,6 @@ class Camera
 private:
 	Vec3 _eye{ 0.0 };
 	Vec3 _target{ 0.0 };
-	Vec3 _up{ 0.0, 1.0, 0.0 };
 	double _fov;
 
 public:
@@ -20,6 +19,5 @@ public:
 
 	Vec3 GetEye() const { return _eye; }
 	Vec3 GetTarget() const { return _target; }
-	Vec3 GetUp() const { return _up; }
 	double GetFOV() const { return _fov; }
 };

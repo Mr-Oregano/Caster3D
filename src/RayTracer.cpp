@@ -98,12 +98,26 @@ Color RayTracer::CalcColor(const Ray &ray, int max_bounces)
 void RayTracer::Draw(ImageBuffer &image_buffer)
 {
 	auto [ width, height ] = image_buffer.GetExtent();
-	const Camera &cam = _config.scene->GetCamera();
+	const Scene &scene = *_config.scene;
+	const Camera &cam = scene.GetCameraConst();
 
 	double distance = 1.0 / glm::tan(glm::radians(cam.GetFOV() / 2.0));
 	Vec3 t = glm::normalize(cam.GetTarget() - cam.GetEye());
-	Vec3 b = glm::cross(t, cam.GetUp());
-	Vec3 v = glm::cross(t, b);
+	Vec3 b, v;
+
+	if (glm::abs(glm::dot(t, scene.GetWorldUp())) == glm::one<double>())
+	{
+		// NOTE: We are parallel to the world UP vector.
+		//		 we need to use a different vector instead.
+		//
+		v = glm::normalize(glm::cross(t, scene.GetWorldRight()));
+		b = glm::cross(v, t);
+	}
+	else
+	{
+		b = glm::normalize(glm::cross(t, scene.GetWorldUp()));
+		v = glm::cross(t, b);
+	}
 
 	Vec3 qx = (2.0 / width) * b;
 	Vec3 qy = (2.0 / height) * v;
@@ -119,8 +133,8 @@ void RayTracer::Draw(ImageBuffer &image_buffer)
 		{
 			double sx = (double) (s % _config.samples) / _config.samples;
 			double sy = (double) (s / _config.samples) / _config.samples;
-			double x = (double) (i % width) + sx;
-			double y = (double) (i / width) + sy;
+			double  x = (double) (i % width) + sx;
+			double  y = (double) (i / width) + sy;
 
 			Ray ray(cam.GetEye(), glm::normalize(bottom_left + qx * x + qy * y));
 			color += CalcColor(ray, _config.ray_depth);

@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 #include <glm/gtx/intersect.hpp>
+#include <glm/gtx/norm.hpp>
 
 using Vec4 = glm::dvec4;
 using Vec3 = glm::dvec3;
