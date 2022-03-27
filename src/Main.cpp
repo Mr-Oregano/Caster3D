@@ -3,19 +3,9 @@
 #include "Scene.h"
 #include "ImageBuffer.h"
 
-#include <stb_image/stb_image_write.h>
-
+#include <iostream>
 #include <string>
 #include <memory>
-
-void WriteOutput(const std::string &filename, const ImageBuffer &buffer, int compression = 3)
-{
-	auto [width, height] = buffer.GetExtent();
-
-	std::uint8_t bpp = buffer.GetBytesPerPixel();
-
-	stbi_write_png(filename.c_str(), width, height, compression, buffer.GetBuffer(), width * bpp);
-}
 
 std::shared_ptr<Scene> GenerateScene()
 {
@@ -178,13 +168,31 @@ std::shared_ptr<Scene> GenerateScene()
 	return scene;
 }
 
-int main()
+int main(int argc, char **argv)
 {	
-	RayTracer tracer(GenerateScene());
-
 	ImageBuffer target(1920, 1920);
 
-	tracer.Draw(target, 2);
+	RayTracerConfig config;
+	config.scene = std::move(GenerateScene());
+	config.samples = 2;
+	config.ray_depth = 16;
+	config.skybox = { 0.5, 0.9, 1.0 };
 
-	WriteOutput("./output/out.png", target);
+	RayTracer tracer(config);
+
+	tracer.Draw(target);
+
+	std::string output_path{ "./out.png" };
+
+	if (argc > 1)
+		output_path = argv[1];
+		
+	if (!target.WriteToFile(output_path))
+	{
+		std::cerr << "Failed to create output path '" << output_path << "'." << std::endl;
+		return -1;
+	}
+
+	std::cout << "Output written to: '" << output_path << "'" << std::endl;
+	return 0;
 }

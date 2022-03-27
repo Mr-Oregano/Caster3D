@@ -5,18 +5,21 @@
 #include "Triangle.h"
 #include "Material.h"
 
-RayTracer::RayTracer(const std::shared_ptr<Scene> &scene)
-	: _scene(scene)
+const double RayTracer::RAYCAST_DIST = std::numeric_limits<double>::infinity();
+
+RayTracer::RayTracer(const RayTracerConfig &config)
+	: _config(config)
 {}
 
 Color RayTracer::CalcColor(const Ray &ray, int max_bounces)
 {
-	HitResult result = _scene->RayCast(ray, 100.0);
+	Scene &scene = *_config.scene;
+	HitResult result = _config.scene->RayCast(ray, RAYCAST_DIST);
 	
 	if (!result)
 		// NOTE: Raycast failed, return skybox color
 		//
-		return { 0.5, 0.9, 1.0 };
+		return _config.skybox;
 
 	Material m = result.material;
 	Triangle t = result.triangle;
@@ -27,7 +30,7 @@ Color RayTracer::CalcColor(const Ray &ray, int max_bounces)
 	Vec3 new_origin = result.hit_point - 0.001 * ray.dir;
 	Color color{ 0.0 };
 
-	for (const auto &light : _scene->GetPointLights())
+	for (const auto &light : scene.GetPointLights())
 	{
 		Vec3 light_dir = light.CalcDir(result.hit_point);
 
@@ -37,12 +40,12 @@ Color RayTracer::CalcColor(const Ray &ray, int max_bounces)
 		color += light.CalcContribution(result.hit_point, -ray.dir, t.normal, m) * m.color * t.color;
 		
 		Ray shadow_cast(new_origin, light_dir);
-		HitResult shadow_hit = _scene->RayCast(shadow_cast, 100.0);
+		HitResult shadow_hit = scene.RayCast(shadow_cast, RAYCAST_DIST);
 		if (shadow_hit && shadow_hit.distance < light.CalcDistance(result.hit_point))
 			color *= shadow_hit.material.transmission;
 	}
 
-	for (const auto &light : _scene->GetDirLights())
+	for (const auto &light : scene.GetDirLights())
 	{
 		if (glm::dot(t.normal, -light.dir) <= 0.0)
 			continue;
@@ -50,7 +53,7 @@ Color RayTracer::CalcColor(const Ray &ray, int max_bounces)
 		color += light.CalcContribution(result.hit_point, -ray.dir, t.normal, m) * m.color * t.color;
 		
 		Ray shadow_cast(new_origin, -light.dir);
-		HitResult shadow_hit = _scene->RayCast(shadow_cast, 100.0);
+		HitResult shadow_hit = scene.RayCast(shadow_cast, RAYCAST_DIST);
 		if (shadow_hit)
 			color *= shadow_hit.material.transmission;
 	}
@@ -92,10 +95,10 @@ Color RayTracer::CalcColor(const Ray &ray, int max_bounces)
 	return color;
 }
 
-void RayTracer::Draw(ImageBuffer &image_buffer, int samples)
+void RayTracer::Draw(ImageBuffer &image_buffer)
 {
 	auto [ width, height ] = image_buffer.GetExtent();
-	const Camera &cam = _scene->GetCamera();
+	const Camera &cam = _config.scene->GetCamera();
 
 	double distance = 1.0 / glm::tan(glm::radians(cam.GetFOV() / 2.0));
 	Vec3 t = glm::normalize(cam.GetTarget() - cam.GetEye());
@@ -106,7 +109,7 @@ void RayTracer::Draw(ImageBuffer &image_buffer, int samples)
 	Vec3 qy = (2.0 / height) * v;
 	Vec3 bottom_left = t * distance - b - v;
 
-	int samples_sqr = samples * samples;
+	int samples_sqr = _config.samples * _config.samples;
 
 	for (std::uint32_t i = 0; i < width * height; ++i)
 	{
@@ -114,13 +117,13 @@ void RayTracer::Draw(ImageBuffer &image_buffer, int samples)
 
 		for (int s = 0; s < samples_sqr; ++s)
 		{
-			double sx = (double) (s % samples) / samples;
-			double sy = (double) (s / samples) / samples;
+			double sx = (double) (s % _config.samples) / _config.samples;
+			double sy = (double) (s / _config.samples) / _config.samples;
 			double x = (double) (i % width) + sx;
 			double y = (double) (i / width) + sy;
 
 			Ray ray(cam.GetEye(), glm::normalize(bottom_left + qx * x + qy * y));
-			color += CalcColor(ray, 16);
+			color += CalcColor(ray, _config.ray_depth);
 		}
 
 		color /= samples_sqr;

@@ -4,6 +4,7 @@
 #include <cstddef>
 
 #include <utility>
+#include <string>
 
 class ImageBuffer
 {
@@ -18,6 +19,7 @@ public:
 
 	void WritePixel(std::uint32_t x, std::uint32_t y, double r, double g, double b);
 	void WritePixel(std::uint32_t px_i, double r, double g, double b);
+	bool WriteToFile(const std::string &filename, int compression = 3);
 
 	std::pair<std::uint32_t, std::uint32_t> GetExtent() const { return { _width, _height }; }
 	std::uint32_t GetBufferSize() const { return _width * _height * _bytes_per_pixel; } 

@@ -7,15 +7,26 @@
 #include <cstdint>
 #include <memory>
 
+struct RayTracerConfig
+{
+	std::shared_ptr<Scene> scene;
+	std::uint8_t samples = 1;
+	std::uint8_t ray_depth = 8;
+	Color skybox{ 0.0 };
+};
+
 class RayTracer
 {
 private:
-	std::shared_ptr<Scene> _scene;
+	RayTracerConfig _config;
 
 public:
-	RayTracer(const std::shared_ptr<Scene> &scene);
-	void Draw(ImageBuffer &image_buffer, int samples = 1);
+	RayTracer(const RayTracerConfig &config);
+	void Draw(ImageBuffer &image_buffer);
 
 private:
 	Color CalcColor(const Ray &ray, int max_bounces);
+
+private:
+	static const double RAYCAST_DIST;
 };
