@@ -1,10 +1,6 @@
 
 #include "RayTracer.h"
 
-#include "Ray.h"
-#include "Triangle.h"
-#include "Material.h"
-
 const double RayTracer::RAYCAST_DIST = std::numeric_limits<double>::infinity();
 
 RayTracer::RayTracer(const RayTracerConfig &config)
@@ -21,36 +17,39 @@ Color RayTracer::CalcColor(const Ray &ray, int max_bounces)
 		//
 		return _config.skybox;
 
-	Material m = result.material;
-	Triangle t = result.triangle;
+	Material &m = result.material;
+	Vec3 normal = result.normal;
+	Vec3 loc = result.hit_point;
+
+	//return normal;
 	
 	// NOTE: We need to add a slight bias to the shadow ray origin
 	//		 in order to reduce surface acne.
 	//
-	Vec3 new_origin = result.hit_point - 0.001 * ray.dir;
+	Vec3 new_origin = loc - 0.001 * ray.dir;
 	Color color{ 0.0 };
 
 	for (const auto &light : scene.GetPointLights())
 	{
-		Vec3 light_dir = light.CalcDir(result.hit_point);
+		Vec3 light_dir = light.CalcDir(loc);
 
-		if (glm::dot(t.normal, light_dir) <= 0.0)
+		if (glm::dot(normal, light_dir) <= 0.0)
 			continue;
 
-		color += light.CalcContribution(result.hit_point, -ray.dir, t.normal, m) * m.color * t.color;
+		color += light.CalcContribution(loc, -ray.dir, normal, m) * m.color;
 		
 		Ray shadow_cast(new_origin, light_dir);
 		HitResult shadow_hit = scene.RayCast(shadow_cast, RAYCAST_DIST);
-		if (shadow_hit && shadow_hit.distance < light.CalcDistance(result.hit_point))
+		if (shadow_hit && shadow_hit.distance < light.CalcDistance(loc))
 			color *= shadow_hit.material.transmission;
 	}
 
 	for (const auto &light : scene.GetDirLights())
 	{
-		if (glm::dot(t.normal, -light.dir) <= 0.0)
+		if (glm::dot(normal, -light.dir) <= 0.0)
 			continue;
 
-		color += light.CalcContribution(result.hit_point, -ray.dir, t.normal, m) * m.color * t.color;
+		color += light.CalcContribution(loc, -ray.dir, normal, m) * m.color;
 		
 		Ray shadow_cast(new_origin, -light.dir);
 		HitResult shadow_hit = scene.RayCast(shadow_cast, RAYCAST_DIST);
@@ -63,31 +62,31 @@ Color RayTracer::CalcColor(const Ray &ray, int max_bounces)
 
 	if (m.reflection > 0.0 && m.transmission < 1.0)
 	{
-		Ray reflected(new_origin, glm::reflect(ray.dir, t.normal));
+		Ray reflected(new_origin, glm::reflect(ray.dir, normal));
 		Color reflection = CalcColor(reflected, max_bounces - 1);
 		color = glm::mix(color, reflection, m.reflection);
 	}
 
 	if (m.transmission > 0.0)
 	{
-		double dot = glm::dot(ray.dir, t.normal);
-		Vec3 normal = -t.normal;
+		double dot = glm::dot(ray.dir, normal);
+		Vec3 N = -normal;
 		double eta = m.refractive_index;
 
 		if (dot < 0.0)
 		{
 			// NOTE: We are entering this object
 			eta = 1.0 / m.refractive_index;
-			normal = -normal;
+			N = -N;
 		}
 
-		Vec3 ref_dir = glm::refract(ray.dir, normal, eta);
+		Vec3 ref_dir = glm::refract(ray.dir, N, eta);
 		
 		if (ref_dir == glm::zero<Vec3>())
 			// NOTE: Total internal reflection!
-			ref_dir = glm::reflect(ray.dir, t.normal);
+			ref_dir = glm::reflect(ray.dir, normal);
 
-		Ray refracted(result.hit_point + 0.001 * ray.dir, ref_dir);
+		Ray refracted(loc + 0.001 * ray.dir, ref_dir);
 		Color refraction = CalcColor(refracted, max_bounces - 1);
 		color = glm::mix(color, refraction, m.transmission);
 	}

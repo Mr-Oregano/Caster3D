@@ -5,14 +5,20 @@
 
 #include <vector>
 
+
 class Mesh
 {
 private:
+	using VertexList = std::initializer_list<Vec3>;
+	using NormalsList = std::initializer_list<Vec3>;
+	using ColorsList = std::initializer_list<Color>;
+
 	std::vector<Triangle> _triangles;
 	Material _material;
 
 public:
-	Mesh(const Triangle triangles[], std::size_t count, const Material &material);
+	Mesh(const VertexList &vertices, const NormalsList &normals, const Material &material);
+	Mesh(const VertexList &vertices, const NormalsList &normals, const ColorsList& colors, const Material &material);
 	virtual ~Mesh() = default;
 
 	void Transform(const Mat4 &model);
@@ -24,6 +30,7 @@ public:
 	void RotateZ(double degrees);
 		
 	const std::vector<Triangle>& GetTriangleList() const { return _triangles; }
+	std::size_t GetTriangleCount() const { return _triangles.size(); }
 	const Material& GetMaterial() const { return _material; }
 };
 

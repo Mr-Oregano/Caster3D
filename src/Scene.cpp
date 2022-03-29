@@ -1,49 +1,74 @@
 
 #include "Scene.h"
 
-void Scene::AddMesh(const std::shared_ptr<Mesh> &mesh)
+#include <algorithm>
+
+void Scene::AddMesh(const MeshPtr &mesh)
 {
+	assert(!_built);
+
 	_meshes.push_back(mesh);
+}
+
+void Scene::AddSphere(const Sphere &sphere)
+{
+	assert(!_built);
+
+	_spheres.push_back(sphere);
+	_volumes.push_back(static_cast<const Volume*>(&*(_spheres.end() - 1)));
 }
 
 void Scene::AddPointLight(const PointLight &light)
 {
+	assert(!_built);
+
 	_point_lights.push_back(light);
 }
 
 void Scene::AddDirLight(const DirectionalLight &light)
 {
+	assert(!_built);
+
 	_dir_lights.push_back(light);
+}
+
+void Scene::Build()
+{
+	assert(!_built);
+
+	// TODO: Build bounding volume hierarchy to make raycasts more efficient.
+
+	for (const auto &mesh : _meshes)
+	{
+		std::size_t count = mesh->GetTriangleCount();
+		const auto& triangles = mesh->GetTriangleList();
+
+		_volumes.reserve(_volumes.size() + count);
+
+		for (int i = 0; i < count; ++i)
+			_volumes.push_back(static_cast<const Volume*>(&triangles[i]));
+	}
+
+	_built = true;
 }
 
 HitResult Scene::RayCast(const Ray &ray, double max_distance)
 {
+	// NOTE: The scene must have been built before we can raycast
+	assert(_built);
+
 	HitResult result;
 	result.distance = max_distance;
 
-	// NOTE: Traverse all triangle lists in scene and find the raycast hit with 
-	//		 smallest distance.
-	// 
-	// TODO: Use bounding volume hierarchy to make this more efficient.
-	//
-	for (const auto &m : _meshes)
+	for (const Volume *v : _volumes)
 	{
-		for (const Triangle &t : m->GetTriangleList())
-		{
-			Vec2 bari_center;
-			double distance = max_distance;
-			bool raycast_hit = glm::intersectRayTriangle(ray.origin, ray.dir, t.v0, t.v1, t.v2, bari_center, distance);
-
-			if (raycast_hit && glm::zero<double>() < distance && distance < result.distance)
-			{
-				result.triangle = t;
-				result.material = m->GetMaterial();
-				result.distance = distance;
-				result.hit_point = ray.GetPoint(distance);
-				result.bari = Vec3{ bari_center, 1.0f - bari_center.x - bari_center.y };
-				result.hit = true;
-			}
-		}
+		HitResult v_hit = v->Hit(ray, max_distance);
+		
+		// NOTE: Traverse all triangle lists in scene and find the raycast hit with 
+		//		 smallest distance.
+		// 
+		if (v_hit && v_hit.distance < result.distance)
+			result = std::move(v_hit);
 	}
 
 	return result;
