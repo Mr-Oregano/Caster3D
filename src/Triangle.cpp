@@ -1,16 +1,18 @@
 
 #include "Triangle.h"
 
-Triangle::Triangle(Vec3 v0, Vec3 v1, Vec3 v2, Vec3 normal, const Material *material)
-	: _normal(normal), _material(material)
+#include <string>
+#include <iostream>
+
+Triangle::Triangle(Vec3 v[3], Vec3 n[3], const Material *material)
+	: _material(material)
 {
-	_v[0] = v0;
-	_v[1] = v1;
-	_v[2] = v2;
+	std::memcpy(_v, v, sizeof(Vec3) * 3);
+	std::memcpy(_n, n, sizeof(Vec3) * 3);
 }
 
-Triangle::Triangle(Vec3 v0, Vec3 v1, Vec3 v2, Vec3 normal, Color color, const Material *material)
-	: Triangle(v0, v1, v2, normal, material)
+Triangle::Triangle(Vec3 v[3], Vec3 n[3], Color color, const Material *material)
+	: Triangle(v, n, material)
 {
 	_color = color;
 }
@@ -27,7 +29,7 @@ HitResult Triangle::Hit(const Ray &ray, double max_distance) const
 		// TODO: Interpolate normal and color values
 		// Vec3 interpolate{ bari, 1.0f - bari.x - bari.y };
 		//
-		result.normal = _normal;
+		result.normal = _n[0];
 		result.material = *_material;
 		result.material.color *= _color;
 
@@ -45,7 +47,6 @@ void Triangle::Transform(const Mat4 &model, const Mat3 &norm)
 	{
 		Vec4 v{ _v[i], 1.0f };
 		_v[i] = Vec3{ model * v };
+		_n[i] = glm::normalize(norm * _n[i]);
 	}
-
-	_normal = glm::normalize(norm * _normal);
 }

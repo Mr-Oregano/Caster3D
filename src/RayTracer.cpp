@@ -21,8 +21,6 @@ Color RayTracer::CalcColor(const Ray &ray, int max_bounces)
 	Vec3 normal = result.normal;
 	Vec3 loc = result.hit_point;
 
-	//return normal;
-	
 	// NOTE: We need to add a slight bias to the shadow ray origin
 	//		 in order to reduce surface acne.
 	//
@@ -41,7 +39,7 @@ Color RayTracer::CalcColor(const Ray &ray, int max_bounces)
 		Ray shadow_cast(new_origin, light_dir);
 		HitResult shadow_hit = scene.RayCast(shadow_cast, RAYCAST_DIST);
 		if (shadow_hit && shadow_hit.distance < light.CalcDistance(loc))
-			color *= shadow_hit.material.transmission;
+			color *= shadow_hit.material.transmissivity;
 	}
 
 	for (const auto &light : scene.GetDirLights())
@@ -54,20 +52,20 @@ Color RayTracer::CalcColor(const Ray &ray, int max_bounces)
 		Ray shadow_cast(new_origin, -light.dir);
 		HitResult shadow_hit = scene.RayCast(shadow_cast, RAYCAST_DIST);
 		if (shadow_hit)
-			color *= shadow_hit.material.transmission;
+			color *= shadow_hit.material.transmissivity;
 	}
 
 	if (max_bounces == 0)
 		return color;
 
-	if (m.reflection > 0.0 && m.transmission < 1.0)
+	if (m.reflection > 0.0 && m.transmissivity < 1.0)
 	{
 		Ray reflected(new_origin, glm::reflect(ray.dir, normal));
 		Color reflection = CalcColor(reflected, max_bounces - 1);
 		color = glm::mix(color, reflection, m.reflection);
 	}
 
-	if (m.transmission > 0.0)
+	if (m.transmissivity > 0.0)
 	{
 		double dot = glm::dot(ray.dir, normal);
 		Vec3 N = -normal;
@@ -88,7 +86,7 @@ Color RayTracer::CalcColor(const Ray &ray, int max_bounces)
 
 		Ray refracted(loc + 0.001 * ray.dir, ref_dir);
 		Color refraction = CalcColor(refracted, max_bounces - 1);
-		color = glm::mix(color, refraction, m.transmission);
+		color = glm::mix(color, refraction, m.transmissivity);
 	}
 
 	return color;

@@ -18,6 +18,7 @@ workspace "Caster3D"
 
 group "Dependencies"
 	include "vendor/stb"
+	include "vendor/tiny_obj_loader"
 group ""
 
 project "Caster3D"
@@ -37,9 +38,11 @@ project "Caster3D"
 	includedirs {
 		"include",
 		"vendor/glm",
-		"vendor/stb"
+		"vendor/stb",
+		"vendor/tiny_obj_loader"
 	}
 
 	links {
-		"stb"
+		"stb",
+		"tiny_obj_loader"
 	}

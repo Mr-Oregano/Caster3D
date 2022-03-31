@@ -6,23 +6,23 @@
 #include "Volume.h"
 
 #include "Sphere.h"
-#include "Mesh.h"
+#include "Triangle.h"
 
 #include <vector>
 #include <memory>
+#include <string>
 
 class Scene
 {
 private:
-	using MeshPtr = std::shared_ptr<const Mesh>;
-
 	std::vector<const Volume*> _volumes;
 	
 	// NOTE: We care about volumes but some may need to be stored
 	//		 by the scene so we can maintain ownership.
 	//
 	std::vector<Sphere> _spheres;
-	std::vector<MeshPtr> _meshes;
+	std::vector<Triangle> _triangles;
+	std::vector<Material> _materials;
 
 	std::vector<PointLight> _point_lights;
 	std::vector<DirectionalLight> _dir_lights;
@@ -32,14 +32,15 @@ private:
 	Vec3 _right{ 1.0, 0.0, 0.0 };
 	
 	bool _built = false;
+	bool _loaded = false;
 
 public:
-	Scene() = default;
+	Scene(const std::string &filename, const std::string &material_path);
 	Scene(const Scene&) = delete;
 	Scene& operator=(const Scene&) = delete;
 
-	void AddMesh(const MeshPtr &mesh);
 	void AddSphere(const Sphere &sphere);
+	void AddTriangle(const Triangle &triangle);
 
 	void AddPointLight(const PointLight &light);
 	void AddDirLight(const DirectionalLight &light);

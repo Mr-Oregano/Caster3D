@@ -11,7 +11,7 @@ struct Material
 	// NOTE: reflection counts as specular
 	//
 	double reflection = 0.0;
-	double transmission = 0.0;
+	double transmissivity = 0.0;
 	double refractive_index = 1.0;
 
 	double shine = 32.0;

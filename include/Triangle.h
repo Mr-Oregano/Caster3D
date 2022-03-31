@@ -7,14 +7,14 @@
 class Triangle : public Volume
 {
 private:
-	Vec3 _normal{ 1.0f };
-	const Material *_material = nullptr;
 	Vec3 _v[3]{};
+	Vec3 _n[3]{};
 	Color _color{ 1.0f };
+	const Material *_material = nullptr;
 
 public:
-	Triangle(Vec3 v0, Vec3 v1, Vec3 v2, Vec3 normal, const Material *material);
-	Triangle(Vec3 v0, Vec3 v1, Vec3 v2, Vec3 normal, Color color, const Material *material);
+	Triangle(Vec3 v[3], Vec3 n[3], const Material *material);
+	Triangle(Vec3 v[3], Vec3 n[3], Color color, const Material *material);
 
 	virtual HitResult Hit(const Ray &ray, double max_distance) const override;
 
