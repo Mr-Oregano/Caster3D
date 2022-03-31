@@ -2,7 +2,7 @@
 CPU raytracer written in C++.
 
 # Demo
-![out](https://user-images.githubusercontent.com/33503562/160544459-1da3871e-c0da-47de-8e16-7cb33f64f5ac.png)
+![out](https://user-images.githubusercontent.com/33503562/160987108-7fe57f89-06df-4f80-9702-e5e903d20d80.png)
 
 # Build
 Use [premake5](https://premake.github.io/) to create project files. Building should be relatively simple from there. Just build in your IDE of choice or `make.` if you're using make. 
