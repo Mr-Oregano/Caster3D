@@ -2,6 +2,8 @@
 #include "RayTracer.h"
 
 #include <iostream>
+#include <random>
+#include <functional>
 
 const double RayTracer::RAYCAST_DIST = std::numeric_limits<double>::infinity();
 
@@ -122,28 +124,30 @@ void RayTracer::Draw(ImageBuffer &image_buffer)
 	Vec3 qy = (2.0 / height) * v;
 	Vec3 bottom_left = t * distance - b - v;
 
-	int samples_sqr = _config.samples * _config.samples;
-	int calculations_to_complete = width * height * samples_sqr;
+	std::default_random_engine generator;
+	std::uniform_real_distribution distribution;
+	auto random = std::bind(distribution, generator);
 	int last_complete = 0;
 
 	for (std::uint32_t i = 0; i < width * height; ++i)
 	{
 		Color color{ 0.0 };
 
-		for (int s = 0; s < samples_sqr; ++s)
+		for (int s = 0; s < _config.samples; ++s)
 		{
-			double sx = (double) (s % _config.samples) / _config.samples;
-			double sy = (double) (s / _config.samples) / _config.samples;
-			double  x = (double) (i % width) + sx;
-			double  y = (double) (i / width) + sy;
+			// TODO: Using uniform random distribution, may want to use blue noise for better effective
+			//		 frequency.
+			//
+			double  x = (double) (i % width) + random();
+			double  y = (double) (i / width) + random();
 
 			Ray ray(cam.GetEye(), glm::normalize(bottom_left + qx * x + qy * y));
 			color += CalcColor(ray, _config.ray_depth);
 		}
 
-		color /= samples_sqr;
+		color /= _config.samples;
 
-		int completed = (i * samples_sqr * 100) / calculations_to_complete;
+		int completed = (i * 100) / (width * height);
 
 		if (completed > last_complete)
 		{

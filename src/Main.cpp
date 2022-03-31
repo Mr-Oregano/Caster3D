@@ -43,8 +43,8 @@ int main(int argc, char **argv)
 
 	RayTracerConfig config;
 	config.scene = scene;
-	config.samples = 2;
-	config.ray_depth = 16;
+	config.samples = 8;
+	config.ray_depth = 8;
 	config.skybox = Color{ 0.0 };
 
 	RayTracer tracer(std::move(config));

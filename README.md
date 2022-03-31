@@ -23,3 +23,4 @@ Use [premake5](https://premake.github.io/) to create project files. Building sho
   - https://raytracing.github.io/books/RayTracingInOneWeekend.html
   - https://en.wikipedia.org/wiki/Path_tracing
   - https://graphics.stanford.edu/courses/cs148-10-summer/docs/2006--degreve--reflection_refraction.pdf
+  - https://computergraphics.stackexchange.com/questions/4248/how-is-anti-aliasing-implemented-in-ray-tracing
