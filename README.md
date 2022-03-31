@@ -13,9 +13,13 @@ Use [premake5](https://premake.github.io/) to create project files. Building sho
 
  - [stb](https://github.com/nothings/stb) (stb_image)
  - [glm](https://github.com/g-truc/glm)
+ - [tiny_obj_loader](https://github.com/tinyobjloader/tinyobjloader)
 
  # Sources
 
   - https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/barycentric-coordinates
   - https://en.wikipedia.org/wiki/Ray_tracing_(graphics)
   - https://math.hws.edu/graphicsbook/c8/s1.html
+  - https://raytracing.github.io/books/RayTracingInOneWeekend.html
+  - https://en.wikipedia.org/wiki/Path_tracing
+  - https://graphics.stanford.edu/courses/cs148-10-summer/docs/2006--degreve--reflection_refraction.pdf
