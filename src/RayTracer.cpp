@@ -1,6 +1,8 @@
 
 #include "RayTracer.h"
 
+#include <iostream>
+
 const double RayTracer::RAYCAST_DIST = std::numeric_limits<double>::infinity();
 
 RayTracer::RayTracer(const RayTracerConfig &config)
@@ -121,6 +123,8 @@ void RayTracer::Draw(ImageBuffer &image_buffer)
 	Vec3 bottom_left = t * distance - b - v;
 
 	int samples_sqr = _config.samples * _config.samples;
+	int calculations_to_complete = width * height * samples_sqr;
+	int last_complete = 0;
 
 	for (std::uint32_t i = 0; i < width * height; ++i)
 	{
@@ -138,6 +142,14 @@ void RayTracer::Draw(ImageBuffer &image_buffer)
 		}
 
 		color /= samples_sqr;
+
+		int completed = (i * samples_sqr * 100) / calculations_to_complete;
+
+		if (completed > last_complete)
+		{
+			std::cout << completed << "% complete..." << std::endl;
+			last_complete = completed;
+		}
 
 		image_buffer.WritePixel(i, color.r, color.g, color.b);
 	}
