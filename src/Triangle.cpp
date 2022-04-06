@@ -26,10 +26,12 @@ HitResult Triangle::Hit(const Ray &ray, double max_distance) const
 
 	if (raycast_hit && max_distance >= glm::zero<double>())
 	{
-		// TODO: Interpolate normal and color values
-		// Vec3 interpolate{ bari, 1.0f - bari.x - bari.y };
-		//
-		result.normal = _n[0];
+		Vec3 interpolate{ bari, 1.0f - bari.x - bari.y };
+		
+		// No idea why it's done in this order (z -> v0, x -> v1, y -> v2) glm has no documentation
+		// for this crap.
+
+		result.normal = interpolate.z * _n[0] * interpolate.x * _n[1] + interpolate.y * _n[2];
 		result.material = *_material;
 		result.material.color *= _color;
 

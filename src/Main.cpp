@@ -8,13 +8,12 @@
 #include <memory>
 
 // TODO:
-//  - Random multisampling
 //	- Instrumentation
 //	- Use BVH acceleration
 //	- Multithreading
 //  - Material CPU shaders and BSDFs
 //		- Fresnel and other lighting effects (Beer's law maybe...)
-//		- Texture sampling and triangle surface interpolation
+//		- Texture sampling
 //		- Caustics
 //	- Light interfaces
 //		- Area lights
