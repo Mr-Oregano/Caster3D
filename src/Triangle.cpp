@@ -31,7 +31,7 @@ HitResult Triangle::Hit(const Ray &ray, double max_distance) const
 		// No idea why it's done in this order (z -> v0, x -> v1, y -> v2) glm has no documentation
 		// for this crap.
 
-		result.normal = interpolate.z * _n[0] * interpolate.x * _n[1] + interpolate.y * _n[2];
+		result.normal = interpolate.z * _n[0] + interpolate.x * _n[1] + interpolate.y * _n[2];
 		result.material = *_material;
 		result.material.color *= _color;
 
