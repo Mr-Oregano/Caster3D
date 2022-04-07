@@ -6,10 +6,11 @@
 #include <iostream>
 #include <string>
 #include <memory>
+#include <chrono>
 
 // TODO:
-//	- Instrumentation
 //	- Use BVH acceleration
+//	- Instrumentation
 //	- Multithreading
 //  - Material CPU shaders and BSDFs
 //		- Fresnel and other lighting effects (Beer's law maybe...)
@@ -42,15 +43,22 @@ int main(int argc, char **argv)
 
 	RayTracerConfig config;
 	config.scene = scene;
-	config.samples = 8;
+	config.samples = 1;
 	config.ray_depth = 8;
 	config.skybox = Color{ 0.0 };
 
 	RayTracer tracer(std::move(config));
 
 	std::cout << "Drawing scene..." << std::endl;
+	
+	std::chrono::high_resolution_clock clock;
+	auto start = clock.now();
 	tracer.Draw(target);
+	auto end = clock.now();
 
+	long long duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+
+	std::cout << "Took " << duration / 1000.0 << " seconds..." << std::endl;
 	std::string output_path{ "./out.png" };
 
 	if (argc > 1)
