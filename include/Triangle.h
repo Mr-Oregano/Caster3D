@@ -16,7 +16,7 @@ public:
 	Triangle(Vec3 v[3], Vec3 n[3], const Material *material);
 	Triangle(Vec3 v[3], Vec3 n[3], Color color, const Material *material);
 
-	virtual HitResult Hit(const Ray &ray, double max_distance) const override;
+	virtual HitResult Hit(const Ray &ray) const override;
 
 	// NOTE: computing the normal matrix is expensive considering
 	//		 this triangle may be part of a massive model, so we

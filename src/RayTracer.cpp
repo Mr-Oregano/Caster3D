@@ -5,8 +5,6 @@
 #include <random>
 #include <functional>
 
-const double RayTracer::RAYCAST_DIST = std::numeric_limits<double>::infinity();
-
 RayTracer::RayTracer(const RayTracerConfig &config)
 	: _config(config)
 {}
@@ -14,7 +12,7 @@ RayTracer::RayTracer(const RayTracerConfig &config)
 Color RayTracer::CalcColor(const Ray &ray, int max_bounces)
 {
 	Scene &scene = *_config.scene;
-	HitResult result = _config.scene->RayCast(ray, RAYCAST_DIST);
+	HitResult result = _config.scene->RayCast(ray);
 	
 	if (!result)
 		// NOTE: Raycast failed, return skybox color
@@ -41,7 +39,7 @@ Color RayTracer::CalcColor(const Ray &ray, int max_bounces)
 		color += light.CalcContribution(loc, -ray.dir, normal, m);
 		
 		Ray shadow_cast(new_origin, light_dir);
-		HitResult shadow_hit = scene.RayCast(shadow_cast, RAYCAST_DIST);
+		HitResult shadow_hit = scene.RayCast(shadow_cast);
 		if (shadow_hit && shadow_hit.distance < light.CalcDistance(loc))
 			color *= shadow_hit.material.transmissivity;
 	}
@@ -54,7 +52,7 @@ Color RayTracer::CalcColor(const Ray &ray, int max_bounces)
 		color += light.CalcContribution(loc, -ray.dir, normal, m);
 		
 		Ray shadow_cast(new_origin, -light.dir);
-		HitResult shadow_hit = scene.RayCast(shadow_cast, RAYCAST_DIST);
+		HitResult shadow_hit = scene.RayCast(shadow_cast);
 		if (shadow_hit)
 			color *= shadow_hit.material.transmissivity;
 	}

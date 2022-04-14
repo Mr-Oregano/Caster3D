@@ -27,6 +27,4 @@ public:
 private:
 	Color CalcColor(const Ray &ray, int max_bounces);
 
-private:
-	static const double RAYCAST_DIST;
 };

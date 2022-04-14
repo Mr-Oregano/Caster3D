@@ -12,5 +12,5 @@ private:
 public:
 	Sphere(Vec3 center, double radius, const Material &material);
 
-	virtual HitResult Hit(const Ray &ray, double max_distance) const override;
+	virtual HitResult Hit(const Ray &ray) const override;
 };

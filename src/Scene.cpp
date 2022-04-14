@@ -143,17 +143,17 @@ void Scene::Build()
 	_built = true;
 }
 
-HitResult Scene::RayCast(const Ray &ray, double max_distance)
+HitResult Scene::RayCast(const Ray &ray)
 {
 	// NOTE: The scene must have been built before we can raycast
 	assert(_built);
 
 	HitResult result;
-	result.distance = max_distance;
+	result.distance = std::numeric_limits<double>::infinity();
 
 	for (const Volume *v : _volumes)
 	{
-		HitResult v_hit = v->Hit(ray, max_distance);
+		HitResult v_hit = v->Hit(ray);
 		
 		if (v_hit && v_hit.distance < result.distance)
 			result = std::move(v_hit);

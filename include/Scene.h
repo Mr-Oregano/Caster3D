@@ -46,7 +46,7 @@ public:
 	void AddDirLight(const DirectionalLight &light);
 	void Build();
 
-	HitResult RayCast(const Ray &ray, double max_distance);
+	HitResult RayCast(const Ray &ray);
 
 	const auto& GetPointLights() const { return _point_lights; }
 	const auto& GetDirLights() const { return _dir_lights; }

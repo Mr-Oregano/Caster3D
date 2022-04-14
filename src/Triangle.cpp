@@ -17,14 +17,16 @@ Triangle::Triangle(Vec3 v[3], Vec3 n[3], Color color, const Material *material)
 	_color = color;
 }
 
-HitResult Triangle::Hit(const Ray &ray, double max_distance) const
+HitResult Triangle::Hit(const Ray &ray) const
 {
 	HitResult result{};
 	
 	Vec2 bari;
-	bool raycast_hit = glm::intersectRayTriangle(ray.origin, ray.dir, _v[0], _v[1], _v[2], bari, max_distance);
 
-	if (raycast_hit && max_distance >= glm::zero<double>())
+	double distance = 0.0;
+	bool raycast_hit = glm::intersectRayTriangle(ray.origin, ray.dir, _v[0], _v[1], _v[2], bari, distance);
+
+	if (raycast_hit && distance >= glm::zero<double>())
 	{
 		Vec3 interpolate{ bari, 1.0f - bari.x - bari.y };
 		
@@ -35,8 +37,8 @@ HitResult Triangle::Hit(const Ray &ray, double max_distance) const
 		result.material = *_material;
 		result.material.diffuse *= _color;
 
-		result.distance = max_distance;
-		result.hit_point = ray.GetPoint(max_distance);
+		result.distance = distance;
+		result.hit_point = ray.GetPoint(result.distance);
 		result.hit = true;
 	}
 
