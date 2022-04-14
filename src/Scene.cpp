@@ -39,17 +39,20 @@ Scene::Scene(const std::string &filename, const std::string &material_path)
 	for (const auto &m : materials)
 	{
 		Material material;
-		material.color = { m.diffuse[0], m.diffuse[1], m.diffuse[2] };
+		material.specular = { m.specular[0], m.specular[1], m.specular[2] };
+		material.diffuse = { m.diffuse[0], m.diffuse[1], m.diffuse[2] };
+		material.ambient = { m.ambient[0], m.ambient[1], m.ambient[2] };
 		material.refractive_index = m.ior;
 		material.shine = m.shininess;
 		material.reflection = m.metallic;
 		material.transmissivity = 1.0 - m.dissolve;
-		material.diffuse = 1.0;
-
+		
 		_materials.push_back(material);
 
 		std::cout << m.name << ":" << std::endl;
-		std::cout << "\t- Diffuse: (" << material.color.r << ", " << material.color.g << ", " << material.color.b << ")" << std::endl;
+		std::cout << "\t- Specular: (" << material.diffuse.r << ", " << material.diffuse.g << ", " << material.diffuse.b << ")" << std::endl;
+		std::cout << "\t- Diffuse: (" << material.diffuse.r << ", " << material.diffuse.g << ", " << material.diffuse.b << ")" << std::endl;
+		std::cout << "\t- Ambient: (" << material.diffuse.r << ", " << material.diffuse.g << ", " << material.diffuse.b << ")" << std::endl;
 		std::cout << "\t- IOR: " << material.refractive_index << std::endl;
 		std::cout << "\t- Shine: " << material.shine << std::endl;
 		std::cout << "\t- Reflection: " << material.reflection << std::endl;
@@ -152,9 +155,6 @@ HitResult Scene::RayCast(const Ray &ray, double max_distance)
 	{
 		HitResult v_hit = v->Hit(ray, max_distance);
 		
-		// NOTE: Traverse all triangle lists in scene and find the raycast hit with 
-		//		 smallest distance.
-		// 
 		if (v_hit && v_hit.distance < result.distance)
 			result = std::move(v_hit);
 	}

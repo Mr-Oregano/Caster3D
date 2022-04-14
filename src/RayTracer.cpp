@@ -38,7 +38,7 @@ Color RayTracer::CalcColor(const Ray &ray, int max_bounces)
 		if (glm::dot(normal, light_dir) <= 0.0)
 			continue;
 
-		color += light.CalcContribution(loc, -ray.dir, normal, m) * m.color;
+		color += light.CalcContribution(loc, -ray.dir, normal, m);
 		
 		Ray shadow_cast(new_origin, light_dir);
 		HitResult shadow_hit = scene.RayCast(shadow_cast, RAYCAST_DIST);
@@ -51,7 +51,7 @@ Color RayTracer::CalcColor(const Ray &ray, int max_bounces)
 		if (glm::dot(normal, -light.dir) <= 0.0)
 			continue;
 
-		color += light.CalcContribution(loc, -ray.dir, normal, m) * m.color;
+		color += light.CalcContribution(loc, -ray.dir, normal, m);
 		
 		Ray shadow_cast(new_origin, -light.dir);
 		HitResult shadow_hit = scene.RayCast(shadow_cast, RAYCAST_DIST);

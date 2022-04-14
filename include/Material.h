@@ -6,7 +6,9 @@
 //
 struct Material
 {
-	Color color{ 1.0 };
+	Color specular{ 1.0 };
+	Color diffuse{ 1.0 };
+	Color ambient{ 0.0 };
 	
 	// NOTE: reflection counts as specular
 	//
@@ -15,5 +17,4 @@ struct Material
 	double refractive_index = 1.0;
 
 	double shine = 32.0;
-	double diffuse = 1.0;
 };
