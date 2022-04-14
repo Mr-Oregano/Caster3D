@@ -138,8 +138,8 @@ void RayTracer::Draw(ImageBuffer &image_buffer)
 			// TODO: Using uniform random distribution, may want to use blue noise for better effective
 			//		 frequency.
 			//
-			double  x = (double) (i % width) + random();
-			double  y = (double) (i / width) + random();
+			double  x = (double) (i % width) + random() * 2.0 - 1.0;
+			double  y = (double) (i / width) + random() * 2.0 - 1.0;
 
 			Ray ray(cam.GetEye(), glm::normalize(bottom_left + qx * x + qy * y));
 			color += CalcColor(ray, _config.ray_depth);
