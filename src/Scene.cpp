@@ -32,7 +32,7 @@ Scene::Scene(const std::string &filename, const std::string &material_path)
 	_materials.reserve(materials.size());
 
 	if (!materials.empty())
-		std::cout << "Loading Materials..." << std::endl;
+		std::cout << "Loading Materials..." << std::endl << std::endl;
 	else
 		std::cout << "No materials found?" << std::endl;
 
@@ -50,13 +50,13 @@ Scene::Scene(const std::string &filename, const std::string &material_path)
 		_materials.push_back(material);
 
 		std::cout << m.name << ":" << std::endl;
-		std::cout << "\t- Specular: (" << material.diffuse.r << ", " << material.diffuse.g << ", " << material.diffuse.b << ")" << std::endl;
-		std::cout << "\t- Diffuse: (" << material.diffuse.r << ", " << material.diffuse.g << ", " << material.diffuse.b << ")" << std::endl;
-		std::cout << "\t- Ambient: (" << material.diffuse.r << ", " << material.diffuse.g << ", " << material.diffuse.b << ")" << std::endl;
-		std::cout << "\t- IOR: " << material.refractive_index << std::endl;
-		std::cout << "\t- Shine: " << material.shine << std::endl;
-		std::cout << "\t- Reflection: " << material.reflection << std::endl;
-		std::cout << "\t- Transmissivity: " << material.transmissivity << std::endl;
+		std::cout << "Specular: (" << material.diffuse.r << ", " << material.diffuse.g << ", " << material.diffuse.b << ")" << std::endl;
+		std::cout << "Diffuse: (" << material.diffuse.r << ", " << material.diffuse.g << ", " << material.diffuse.b << ")" << std::endl;
+		std::cout << "Ambient: (" << material.diffuse.r << ", " << material.diffuse.g << ", " << material.diffuse.b << ")" << std::endl;
+		std::cout << "IOR: " << material.refractive_index << std::endl;
+		std::cout << "Shine: " << material.shine << std::endl;
+		std::cout << "Reflection: " << material.reflection << std::endl;
+		std::cout << "Transmissivity: " << material.transmissivity << std::endl << std::endl;
 	}
 
 	for (const auto &s : shapes)
@@ -116,7 +116,6 @@ void Scene::AddDirLight(const DirectionalLight &light)
 void Scene::Build()
 {
 	assert(!_built && _loaded);
-	std::cout << "Scene triangle count: " << _triangles.size() << std::endl;
 
 	std::sort(_triangles.begin(), _triangles.end(), [](const Triangle &t1, const Triangle &t2)
 	{
@@ -136,7 +135,9 @@ void Scene::Build()
 	_bounds.reserve(bvh_max_size);
 	_root = SplitBVH(0, _triangles.size() - 1);
 
-	std::cout << "Bounding box count: " << _bounds.size() << std::endl;
+	metrics.triangle_count = _triangles.size();
+	metrics.bvh_size = _bounds.size();
+
 	_built = true;
 }
 
@@ -144,6 +145,8 @@ HitResult Scene::RayCast(const Ray &ray)
 {
 	// NOTE: The scene must have been built before we can raycast
 	assert(_built);
+
+	++metrics.raycast_count;
 
 	return _root->Hit(ray);
 }

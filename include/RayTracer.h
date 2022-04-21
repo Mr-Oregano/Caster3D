@@ -3,6 +3,7 @@
 #include "Scene.h"
 #include "ImageBuffer.h"
 #include "Maths.h"
+#include "Metrics.h"
 
 #include <cstdint>
 #include <memory>

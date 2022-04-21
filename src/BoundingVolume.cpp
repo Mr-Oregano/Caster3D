@@ -37,6 +37,8 @@ HitResult BoundingVolume::Hit(const Ray &ray) const
 	double start = glm::max(t1.x, glm::max(t1.y, t1.z));
 	double end = glm::min(t2.x, glm::min(t2.y, t2.z));
 
+	++metrics.avg_hit_tests_per_raycast;
+
 	if (start <= end && end >= glm::zero<double>())
 	{
 		HitResult result;

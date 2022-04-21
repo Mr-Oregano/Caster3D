@@ -5,11 +5,16 @@ workspace "Caster3D"
 
 	configurations {
 		"Debug",
+		"Profile",
 		"Release"
 	}
 
 	filter "configurations:Debug"
 		optimize "off"
+		symbols "on"
+
+	filter "configurations:Profile"
+		optimize "speed"
 		symbols "on"
 
 	filter "configurations:Release"

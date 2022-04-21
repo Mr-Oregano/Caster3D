@@ -50,6 +50,7 @@ HitResult Triangle::Hit(const Ray &ray) const
 		result.hit = true;
 	}
 
+	++metrics.avg_hit_tests_per_raycast;
 	return result;
 }
 

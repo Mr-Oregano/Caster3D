@@ -13,6 +13,7 @@ Color RayTracer::CalcColor(const Ray &ray, int max_bounces)
 {
 	Scene &scene = *_config.scene;
 	HitResult result = _config.scene->RayCast(ray);
+	++metrics.avg_raycasts_per_pixel;
 	
 	if (!result)
 		// NOTE: Raycast failed, return skybox color
@@ -40,6 +41,8 @@ Color RayTracer::CalcColor(const Ray &ray, int max_bounces)
 		
 		Ray shadow_cast(new_origin, light_dir);
 		HitResult shadow_hit = scene.RayCast(shadow_cast);
+		++metrics.avg_raycasts_per_pixel;
+
 		if (shadow_hit && shadow_hit.distance < light.CalcDistance(loc))
 			color *= shadow_hit.material.transmissivity;
 	}
@@ -53,6 +56,8 @@ Color RayTracer::CalcColor(const Ray &ray, int max_bounces)
 		
 		Ray shadow_cast(new_origin, -light.dir);
 		HitResult shadow_hit = scene.RayCast(shadow_cast);
+		++metrics.avg_raycasts_per_pixel;
+
 		if (shadow_hit)
 			color *= shadow_hit.material.transmissivity;
 	}
@@ -126,6 +131,9 @@ void RayTracer::Draw(ImageBuffer &image_buffer)
 	std::uniform_real_distribution distribution;
 	auto random = std::bind(distribution, generator);
 	int last_complete = 0;
+
+	metrics.pixel_count = width * height;
+	metrics.samples_per_pixel = _config.samples;
 
 	for (std::uint32_t i = 0; i < width * height; ++i)
 	{

@@ -32,7 +32,7 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-	scene->AddDirLight({ Vec3{ -1.0, -10.0, 1.5 }, Color{ 1.0 }, 0.1 });
+	// scene->AddDirLight({ Vec3{ -1.0, -10.0, 1.5 }, Color{ 1.0 }, 0.1 });
 	scene->AddPointLight({ {  3.0, 5.0, -1.0 }, { 0.5, 1.0, 0.4 }, 4.0 });
 	scene->AddPointLight({ { -1.0, 3.0,  1.0 }, { 0.3, 0.1, 1.0 }, 5.0 });
 
@@ -45,7 +45,7 @@ int main(int argc, char **argv)
 	RayTracerConfig config;
 	config.scene = scene;
 	config.samples = 10;
-	config.ray_depth = 16;
+	config.ray_depth = 1;
 	config.skybox = Color{ 0.0 };
 
 	RayTracer tracer(std::move(config));
@@ -59,7 +59,19 @@ int main(int argc, char **argv)
 
 	long long duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
+	metrics.avg_hit_tests_per_raycast /= metrics.raycast_count;
+	metrics.avg_raycasts_per_pixel /= metrics.pixel_count;
+
+	std::cout << std::endl << "Metrics:" << std::endl;
 	std::cout << "Took " << duration / 1000.0 << " seconds..." << std::endl;
+	std::cout << "Pixels: " << metrics.pixel_count << std::endl;
+	std::cout << "Samples: " << metrics.samples_per_pixel << std::endl;
+	std::cout << "Raycasts: " << metrics.raycast_count << std::endl;
+	std::cout << "Triangles: " << metrics.triangle_count << std::endl;
+	std::cout << "BVH Size: " << metrics.bvh_size << std::endl;
+	std::cout << "Avg Hit Tests Per Raycast: " << metrics.avg_hit_tests_per_raycast << std::endl;
+	std::cout << "Avg Raycasts Per pixel: " << metrics.avg_raycasts_per_pixel << std::endl;
+
 	std::string output_path{ "./out.png" };
 
 	if (argc > 1)
