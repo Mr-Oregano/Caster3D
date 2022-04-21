@@ -7,6 +7,7 @@
 
 #include "Sphere.h"
 #include "Triangle.h"
+#include "BoundingVolume.h"
 
 #include <vector>
 #include <memory>
@@ -15,15 +16,16 @@
 class Scene
 {
 private:
-	std::vector<const Volume*> _volumes;
-	
-	// NOTE: We care about volumes but some may need to be stored
-	//		 by the scene so we can maintain ownership.
+	const Volume *_root = nullptr;
+
+	// NOTE: We reference volumes and resources by their interfaces, but
+	//		 we still need to store their values somewhere. 
 	//
 	std::vector<Sphere> _spheres;
 	std::vector<Triangle> _triangles;
-	std::vector<Material> _materials;
+	std::vector<BoundingVolume> _bounds;
 
+	std::vector<Material> _materials;
 	std::vector<PointLight> _point_lights;
 	std::vector<DirectionalLight> _dir_lights;
 	
@@ -39,9 +41,6 @@ public:
 	Scene(const Scene&) = delete;
 	Scene& operator=(const Scene&) = delete;
 
-	void AddSphere(const Sphere &sphere);
-	void AddTriangle(const Triangle &triangle);
-
 	void AddPointLight(const PointLight &light);
 	void AddDirLight(const DirectionalLight &light);
 	void Build();
@@ -55,4 +54,8 @@ public:
 	const Camera& GetCameraConst() const { return _camera; }
 	Vec3 GetWorldUp() const { return _up; };
 	Vec3 GetWorldRight() const { return _right; }
+
+private:
+	Volume *SplitBVH(std::size_t left, std::size_t right);
+
 };

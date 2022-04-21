@@ -9,7 +9,6 @@
 #include <chrono>
 
 // TODO:
-//	- Use BVH acceleration
 //	- Instrumentation
 //	- Multithreading
 //  - Material CPU shaders and BSDFs
@@ -24,7 +23,7 @@
 //
 int main(int argc, char **argv)
 {	
-	ImageBuffer target(1920, 1920);
+	ImageBuffer target(512, 512);
 	std::shared_ptr<Scene> scene = std::make_shared<Scene>("./res/sample.obj", "./res");
 
 	if (!scene)
@@ -33,18 +32,20 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
+	scene->AddDirLight({ Vec3{ -1.0, -10.0, 1.5 }, Color{ 1.0 }, 0.1 });
 	scene->AddPointLight({ {  3.0, 5.0, -1.0 }, { 0.5, 1.0, 0.4 }, 4.0 });
 	scene->AddPointLight({ { -1.0, 3.0,  1.0 }, { 0.3, 0.1, 1.0 }, 5.0 });
 
 	Camera &cam = scene->GetCamera();
-	cam.Translate(Vec3{ 0.0, 4.0, 6.0 });
+	cam.Translate(Vec3{ 4.0, 2.0, 4.0 });
+	cam.LookAt(Vec3{ 0.0, 0.5, 0.0 });
 
 	scene->Build();
 
 	RayTracerConfig config;
 	config.scene = scene;
-	config.samples = 1;
-	config.ray_depth = 8;
+	config.samples = 10;
+	config.ray_depth = 16;
 	config.skybox = Color{ 0.0 };
 
 	RayTracer tracer(std::move(config));

@@ -25,3 +25,8 @@ HitResult Sphere::Hit(const Ray &ray) const
 
 	return result;
 }
+
+AABB Sphere::GetAABB() const
+{
+	return { Vec3{ -_radius }, Vec3{ _radius }};
+}

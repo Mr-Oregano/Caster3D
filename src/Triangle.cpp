@@ -9,6 +9,14 @@ Triangle::Triangle(Vec3 v[3], Vec3 n[3], const Material *material)
 {
 	std::memcpy(_v, v, sizeof(Vec3) * 3);
 	std::memcpy(_n, n, sizeof(Vec3) * 3);
+
+	_aabb.bl.x = glm::min(v[0].x, glm::min(v[1].x, v[2].x));
+	_aabb.bl.y = glm::min(v[0].y, glm::min(v[1].y, v[2].y));
+	_aabb.bl.z = glm::min(v[0].z, glm::min(v[1].z, v[2].z));
+	
+	_aabb.tr.x = glm::max(v[0].x, glm::max(v[1].x, v[2].x));
+	_aabb.tr.y = glm::max(v[0].y, glm::max(v[1].y, v[2].y));
+	_aabb.tr.z = glm::max(v[0].z, glm::max(v[1].z, v[2].z));
 }
 
 Triangle::Triangle(Vec3 v[3], Vec3 n[3], Color color, const Material *material)
@@ -43,6 +51,11 @@ HitResult Triangle::Hit(const Ray &ray) const
 	}
 
 	return result;
+}
+
+AABB Triangle::GetAABB() const
+{
+	return _aabb;
 }
 
 void Triangle::Transform(const Mat4 &model, const Mat3 &norm)

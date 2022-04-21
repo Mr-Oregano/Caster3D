@@ -99,22 +99,6 @@ Scene::Scene(const std::string &filename, const std::string &material_path)
 	_loaded = true;
 }
 
-void Scene::AddSphere(const Sphere &sphere)
-{
-	assert(!_built && _loaded);
-
-	_spheres.push_back(sphere);
-	_volumes.push_back(&*(_spheres.end() - 1));
-}
-
-void Scene::AddTriangle(const Triangle &triangle)
-{
-	assert(!_built && _loaded);
-
-	_triangles.push_back(triangle);
-	_volumes.push_back(&*(_triangles.end() - 1));
-}
-
 void Scene::AddPointLight(const PointLight &light)
 {
 	assert(!_built && _loaded);
@@ -132,14 +116,27 @@ void Scene::AddDirLight(const DirectionalLight &light)
 void Scene::Build()
 {
 	assert(!_built && _loaded);
+	std::cout << "Scene triangle count: " << _triangles.size() << std::endl;
 
-	// TODO: Build bounding volume hierarchy to make raycasts more efficient.
+	std::sort(_triangles.begin(), _triangles.end(), [](const Triangle &t1, const Triangle &t2)
+	{
+		return t1.GetAABB().bl.x > t2.GetAABB().bl.x;
+	});
 
-	_volumes.reserve(_triangles.size());
+	std::size_t bvh_max_size = _triangles.size();
 
-	for (int i = 0; i < _triangles.size(); ++i)
-		_volumes.push_back(&_triangles[i]);
+	// Determine the next power of 2, minus one
+	bvh_max_size |= bvh_max_size >> 1;
+	bvh_max_size |= bvh_max_size >> 2;
+	bvh_max_size |= bvh_max_size >> 4;
+	bvh_max_size |= bvh_max_size >> 8;
+	bvh_max_size |= bvh_max_size >> 16;
+	bvh_max_size |= bvh_max_size >> 32;
 
+	_bounds.reserve(bvh_max_size);
+	_root = SplitBVH(0, _triangles.size() - 1);
+
+	std::cout << "Bounding box count: " << _bounds.size() << std::endl;
 	_built = true;
 }
 
@@ -148,16 +145,26 @@ HitResult Scene::RayCast(const Ray &ray)
 	// NOTE: The scene must have been built before we can raycast
 	assert(_built);
 
-	HitResult result;
-	result.distance = std::numeric_limits<double>::infinity();
+	return _root->Hit(ray);
+}
 
-	for (const Volume *v : _volumes)
+Volume *Scene::SplitBVH(std::size_t left, std::size_t right)
+{
+	// NOTE: We DO NOT want to expand past the current capacity for the risk
+	//		 of invalidating all the pointers we have gathered.
+	//
+	assert(_bounds.size() <= _bounds.capacity());
+
+	if (right - left < 2)
 	{
-		HitResult v_hit = v->Hit(ray);
-		
-		if (v_hit && v_hit.distance < result.distance)
-			result = std::move(v_hit);
+		_bounds.emplace_back(BoundingVolume{ &_triangles[left], &_triangles[right] });
+		return &_bounds[_bounds.size() - 1];
 	}
 
-	return result;
+	std::size_t center = (left + right) / 2;
+	Volume *left_bvh = SplitBVH(left, center);
+	Volume *right_bvh = SplitBVH(center + 1, right);
+	_bounds.emplace_back(BoundingVolume{ left_bvh, right_bvh });
+
+	return &_bounds[_bounds.size() - 1];
 }
