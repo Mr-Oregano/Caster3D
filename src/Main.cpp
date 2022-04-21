@@ -2,6 +2,7 @@
 #include "RayTracer.h"
 #include "Scene.h"
 #include "ImageBuffer.h"
+#include "Metrics.h"
 
 #include <iostream>
 #include <string>
@@ -10,7 +11,6 @@
 
 // TODO:
 //	- Instrumentation
-//	- Multithreading
 //  - Material CPU shaders and BSDFs
 //		- Fresnel and other lighting effects (Beer's law maybe...)
 //		- Texture sampling

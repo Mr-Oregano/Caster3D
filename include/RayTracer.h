@@ -3,7 +3,6 @@
 #include "Scene.h"
 #include "ImageBuffer.h"
 #include "Maths.h"
-#include "Metrics.h"
 
 #include <cstdint>
 #include <memory>
@@ -13,6 +12,7 @@ struct RayTracerConfig
 	std::shared_ptr<Scene> scene;
 	std::uint8_t samples = 1;
 	std::uint8_t ray_depth = 8;
+	std::uint8_t thread_count = 32;
 	Color skybox{ 0.0 };
 };
 

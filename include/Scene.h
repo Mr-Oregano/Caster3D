@@ -8,7 +8,6 @@
 #include "Sphere.h"
 #include "Triangle.h"
 #include "BoundingVolume.h"
-#include "Metrics.h"
 
 #include <vector>
 #include <memory>

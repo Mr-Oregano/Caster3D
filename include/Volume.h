@@ -3,7 +3,6 @@
 #include "Maths.h"
 #include "HitResult.h"
 #include "AABB.h"
-#include "Metrics.h"
 
 class Volume
 {

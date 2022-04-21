@@ -1,5 +1,6 @@
 
 #include "Scene.h"
+#include "Metrics.h"
 
 #include "tiny_obj_loader.h"
 
@@ -145,8 +146,6 @@ HitResult Scene::RayCast(const Ray &ray)
 {
 	// NOTE: The scene must have been built before we can raycast
 	assert(_built);
-
-	++metrics.raycast_count;
 
 	return _root->Hit(ray);
 }
