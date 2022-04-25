@@ -29,7 +29,7 @@ group ""
 project "Caster3D"
 	kind "ConsoleApp"
 	language "C++"
-	cppdialect "C++17"
+	cppdialect "C++20"
 	staticruntime "on"
 
 	targetdir ("bin/%{cfg.architecture}-%{cfg.buildcfg}-%{cfg.system}")

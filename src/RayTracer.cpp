@@ -100,9 +100,7 @@ Color RayTracer::CalcColor(const Ray &ray, int max_bounces)
 
 void RayTracer::Draw(ImageBuffer &image_buffer)
 {
-	auto extent = image_buffer.GetExtent();
-	std::uint32_t width = extent.first;
-	std::uint32_t height = extent.second;
+	auto [ width, height ] = image_buffer.GetExtent();
 
 	const Scene &scene = *_config.scene;
 	const Camera &cam = scene.GetCameraConst();
