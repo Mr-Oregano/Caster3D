@@ -100,7 +100,10 @@ Color RayTracer::CalcColor(const Ray &ray, int max_bounces)
 
 void RayTracer::Draw(ImageBuffer &image_buffer)
 {
-	auto [ width, height ] = image_buffer.GetExtent();
+	auto extent = image_buffer.GetExtent();
+	std::uint32_t width = extent.first;
+	std::uint32_t height = extent.second;
+
 	const Scene &scene = *_config.scene;
 	const Camera &cam = scene.GetCameraConst();
 
@@ -126,26 +129,25 @@ void RayTracer::Draw(ImageBuffer &image_buffer)
 	Vec3 qy = (2.0 / height) * v;
 	Vec3 bottom_left = t * distance - b - v;
 
-	std::default_random_engine generator;
-	std::uniform_real_distribution distribution;
-	auto random = std::bind(distribution, generator);
-
-	metrics.pixel_count = width * height;
-	metrics.samples_per_pixel = _config.samples;
-
 	std::vector<std::thread> workers;
 	workers.reserve(_config.thread_count);
 		
 	std::uint32_t total = width * height;
 	std::uint32_t group_size = total / _config.thread_count;
+	
+	metrics.pixel_count = total;
+	metrics.samples_per_pixel = _config.samples;
 
 	for (int thread = 0; thread < _config.thread_count; ++thread)
 	{
-		workers.emplace_back(std::thread{ [=, &image_buffer, &random]()
+		workers.emplace_back(std::thread{ [=, &image_buffer]()
 		{
+			std::default_random_engine generator;
+			std::uniform_real_distribution distribution;
+			auto random = std::bind(distribution, generator);
+
 			std::uint32_t start = thread * group_size;
 			std::uint32_t end = start + glm::min(group_size, total - start);
-			double contribution_amount = 100 * (start - end) / total;
 
 			for (std::uint32_t i = start; i < end; ++i)
 			{
