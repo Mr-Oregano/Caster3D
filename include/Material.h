@@ -1,20 +1,20 @@
 #pragma once
 
 #include "Maths.h"
+#include "HitResult.h"
 
-// Standard phong shading model.
-//
-struct Material
+class Scene;
+
+struct ShadingContext
 {
-	Color specular{ 1.0 };
-	Color diffuse{ 1.0 };
-	Color ambient{ 0.0 };
-	
-	// NOTE: reflection counts as specular
-	//
-	double reflection = 0.0;
-	double transmissivity = 0.0;
-	double refractive_index = 1.0;
+	const Scene *scene = nullptr;
+	HitResult hitInfo;
+	Ray ray;
+};
 
-	double shine = 32.0;
+class Material
+{
+public:
+	virtual ~Material() = default;
+	virtual Color Shade(const ShadingContext &context, int samples, int max_depth) const = 0;
 };

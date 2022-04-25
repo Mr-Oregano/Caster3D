@@ -9,11 +9,9 @@
 
 struct RayTracerConfig
 {
-	std::shared_ptr<Scene> scene;
-	std::uint8_t samples = 1;
+	std::uint8_t samples = 10;
 	std::uint8_t ray_depth = 8;
 	std::uint8_t thread_count = 32;
-	Color skybox{ 0.0 };
 };
 
 class RayTracer
@@ -23,9 +21,6 @@ private:
 
 public:
 	RayTracer(const RayTracerConfig &config);
-	void Draw(ImageBuffer &image_buffer);
-
-private:
-	Color CalcColor(const Ray &ray, int max_bounces);
+	void Draw(Scene &scene, ImageBuffer &image_buffer);
 
 };

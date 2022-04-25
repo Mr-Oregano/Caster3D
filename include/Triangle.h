@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Material.h"
 #include "Volume.h"
 #include "Maths.h"
+#include "Material.h"
 
 class Triangle : public Volume
 {

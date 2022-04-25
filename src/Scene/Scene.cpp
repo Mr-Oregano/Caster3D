@@ -2,12 +2,16 @@
 #include "Scene.h"
 #include "Metrics.h"
 
+#include "Phong.h"
+#include "PhongReflective.h"
+
 #include "tiny_obj_loader.h"
 
 #include <algorithm>
 #include <iostream>
 
-Scene::Scene(const std::string &filename, const std::string &material_path)
+Scene::Scene(const std::string &filename, const std::string &material_path, Color skybox)
+	: _skybox(skybox)
 {
 	tinyobj::ObjReaderConfig reader_config;
 	reader_config.mtl_search_path = material_path;
@@ -39,25 +43,25 @@ Scene::Scene(const std::string &filename, const std::string &material_path)
 
 	for (const auto &m : materials)
 	{
-		Material material;
-		material.specular = { m.specular[0], m.specular[1], m.specular[2] };
-		material.diffuse = { m.diffuse[0], m.diffuse[1], m.diffuse[2] };
-		material.ambient = { m.ambient[0], m.ambient[1], m.ambient[2] };
-		material.refractive_index = m.ior;
-		material.shine = m.shininess;
-		material.reflection = m.metallic;
-		material.transmissivity = 1.0 - m.dissolve;
+		PhongReflectiveConfig phong_config;
+		phong_config.specular = { m.specular[0], m.specular[1], m.specular[2] };
+		phong_config.diffuse = { m.diffuse[0], m.diffuse[1], m.diffuse[2] };
+		phong_config.ambient = { m.ambient[0], m.ambient[1], m.ambient[2] };
+		phong_config.refractive_index = m.ior;
+		phong_config.shine = m.shininess;
+		phong_config.reflection = m.metallic;
+		phong_config.transmissivity = 1.0 - m.dissolve;
 		
-		_materials.push_back(material);
+		_materials.push_back(std::make_shared<PhongReflective>(phong_config));
 
 		std::cout << m.name << ":" << std::endl;
-		std::cout << "Specular: (" << material.diffuse.r << ", " << material.diffuse.g << ", " << material.diffuse.b << ")" << std::endl;
-		std::cout << "Diffuse: (" << material.diffuse.r << ", " << material.diffuse.g << ", " << material.diffuse.b << ")" << std::endl;
-		std::cout << "Ambient: (" << material.diffuse.r << ", " << material.diffuse.g << ", " << material.diffuse.b << ")" << std::endl;
-		std::cout << "IOR: " << material.refractive_index << std::endl;
-		std::cout << "Shine: " << material.shine << std::endl;
-		std::cout << "Reflection: " << material.reflection << std::endl;
-		std::cout << "Transmissivity: " << material.transmissivity << std::endl << std::endl;
+		std::cout << "Specular: (" << phong_config.diffuse.r << ", " << phong_config.diffuse.g << ", " << phong_config.diffuse.b << ")" << std::endl;
+		std::cout << "Diffuse: (" << phong_config.diffuse.r << ", " << phong_config.diffuse.g << ", " << phong_config.diffuse.b << ")" << std::endl;
+		std::cout << "Ambient: (" << phong_config.diffuse.r << ", " << phong_config.diffuse.g << ", " << phong_config.diffuse.b << ")" << std::endl;
+		std::cout << "IOR: " << phong_config.refractive_index << std::endl;
+		std::cout << "Shine: " << phong_config.shine << std::endl;
+		std::cout << "Reflection: " << phong_config.reflection << std::endl;
+		std::cout << "Transmissivity: " << phong_config.transmissivity << std::endl << std::endl;
 	}
 
 	for (const auto &s : shapes)
@@ -92,7 +96,7 @@ Scene::Scene(const std::string &filename, const std::string &material_path)
 			_triangles.emplace_back(Triangle{
 				vertices,
 				normals,
-				&_materials[mat_id]
+				_materials[mat_id].get()
 			});
 		}
 	}
@@ -142,7 +146,24 @@ void Scene::Build()
 	_built = true;
 }
 
-HitResult Scene::RayCast(const Ray &ray)
+Color Scene::Trace(const Ray &ray, int samples, int max_depth) const
+{
+	HitResult result = RayCast(ray);
+
+	if (!result)
+		// NOTE: Raycast failed, return skybox color
+		//
+		return _skybox;
+
+	ShadingContext context{};
+	context.hitInfo = result;
+	context.ray = ray;
+	context.scene = this;
+
+	return result.material->Shade(context, samples, max_depth);
+}
+
+HitResult Scene::RayCast(const Ray &ray) const
 {
 	// NOTE: The scene must have been built before we can raycast
 	assert(_built);

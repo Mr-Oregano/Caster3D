@@ -23,8 +23,8 @@
 //
 int main(int argc, char **argv)
 {	
-	ImageBuffer target(512, 512);
-	std::shared_ptr<Scene> scene = std::make_shared<Scene>("./res/sample.obj", "./res");
+	ImageBuffer target(1920, 1920);
+	std::shared_ptr<Scene> scene = std::make_shared<Scene>("./res/sample.obj", "./res", Color{ 0.0 });
 
 	if (!scene)
 	{
@@ -32,9 +32,8 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-	// scene->AddDirLight({ Vec3{ -1.0, -10.0, 1.5 }, Color{ 1.0 }, 0.1 });
-	scene->AddPointLight({ {  3.0, 5.0, -1.0 }, { 0.5, 1.0, 0.4 }, 4.0 });
-	scene->AddPointLight({ { -1.0, 3.0,  1.0 }, { 0.3, 0.1, 1.0 }, 5.0 });
+	scene->AddPointLight({ {  3.0, 5.0, -1.0 }, { 0.5, 1.0, 0.4 }, 4.0, 0.05 });
+	scene->AddPointLight({ { -1.0, 3.0,  1.0 }, { 0.3, 0.1, 1.0 }, 2.0, 0.05 });
 
 	Camera &cam = scene->GetCamera();
 	cam.Translate(Vec3{ 4.0, 2.0, 4.0 });
@@ -43,10 +42,9 @@ int main(int argc, char **argv)
 	scene->Build();
 
 	RayTracerConfig config;
-	config.scene = scene;
 	config.samples = 10;
-	config.ray_depth = 1;
-	config.skybox = Color{ 0.0 };
+	config.ray_depth = 8;
+	config.thread_count = 64;
 
 	RayTracer tracer(std::move(config));
 
@@ -54,7 +52,7 @@ int main(int argc, char **argv)
 	
 	std::chrono::high_resolution_clock clock;
 	auto start = clock.now();
-	tracer.Draw(target);
+	tracer.Draw(*scene, target);
 	auto end = clock.now();
 
 	long long duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();

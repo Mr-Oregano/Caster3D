@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-Sphere::Sphere(Vec3 center, double radius, const Material &material)
+Sphere::Sphere(Vec3 center, double radius, const Material *material)
 	: _center(center), _radius(radius), _material(material)
 {}
 

@@ -42,9 +42,8 @@ HitResult Triangle::Hit(const Ray &ray) const
 		// for this crap.
 
 		result.normal = interpolate.z * _n[0] + interpolate.x * _n[1] + interpolate.y * _n[2];
-		result.material = *_material;
-		result.material.diffuse *= _color;
-
+		result.material = _material;
+		result.triangle_color = _color;
 		result.distance = distance;
 		result.hit_point = ray.GetPoint(result.distance);
 		result.hit = true;

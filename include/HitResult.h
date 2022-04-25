@@ -1,15 +1,19 @@
 #pragma once
 
 #include "Maths.h"
-#include "Material.h"
+
+class Material;
 
 struct HitResult
 {
-	Material material;
+	const Material *material = nullptr;
 	Vec3 hit_point{ 0.0 };
 	Vec3 normal{ 0.0 };
 	bool hit = false;
 	double distance = 0.0;
+
+	// NOTE: for debugging
+	Color triangle_color;
 
 public:
 	operator bool() const { return hit; }
