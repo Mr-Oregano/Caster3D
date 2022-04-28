@@ -60,18 +60,23 @@ Scene::Scene(std::string filename, std::string material_path, Color skybox)
 		phong_config.reflection = m.metallic;
 		phong_config.transmissivity = 1.0 - m.dissolve;
 
-		std::string amb_path = material_path + m.ambient_texname;
-		std::string diff_path = material_path + m.diffuse_texname;
-		std::string spec_path = material_path + m.specular_texname;
-
 		if (!m.ambient_texname.empty())
-			phong_config.phong.ambient_tex = GetTexture(amb_path);
+		{
+			phong_config.phong.ambient_tex = GetTexture(material_path + m.ambient_texname);
+			phong_config.phong.ambient_sampling.wrap = m.ambient_texopt.clamp ? TextureWrap::CLAMP : TextureWrap::REPEAT;
+		}
 
 		if (!m.diffuse_texname.empty())
-			phong_config.phong.diffuse_tex = GetTexture(diff_path);
+		{
+			phong_config.phong.diffuse_tex = GetTexture(material_path + m.diffuse_texname);
+			phong_config.phong.diffuse_sampling.wrap = m.diffuse_texopt.clamp ? TextureWrap::CLAMP : TextureWrap::REPEAT;
+		}
 		
 		if (!m.specular_texname.empty())
-			phong_config.phong.specular_tex = GetTexture(spec_path);
+		{
+			phong_config.phong.specular_tex = GetTexture(material_path + m.specular_texname);
+			phong_config.phong.specular_sampling.wrap = m.specular_texopt.clamp ? TextureWrap::CLAMP : TextureWrap::REPEAT;
+		}
 		
 		_materials.push_back(std::make_shared<PhongReflective>(phong_config));
 
