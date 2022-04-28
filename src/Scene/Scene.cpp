@@ -65,22 +65,13 @@ Scene::Scene(std::string filename, std::string material_path, Color skybox)
 		std::string spec_path = material_path + m.specular_texname;
 
 		if (!m.ambient_texname.empty())
-		{
-			std::cout << "Loading '" << amb_path << "' ..." << std::endl;
-			phong_config.phong.ambient_tex = std::make_shared<Texture2D>(amb_path);
-		}
+			phong_config.phong.ambient_tex = GetTexture(amb_path);
 
 		if (!m.diffuse_texname.empty())
-		{
-			std::cout << "Loading '" << diff_path << "' ..." << std::endl;
-			phong_config.phong.diffuse_tex = std::make_shared<Texture2D>(diff_path);
-		}
+			phong_config.phong.diffuse_tex = GetTexture(diff_path);
 		
 		if (!m.specular_texname.empty())
-		{
-			std::cout << "Loading '" << spec_path << "' ..." << std::endl;
-			phong_config.phong.specular_tex = std::make_shared<Texture2D>(spec_path);
-		}
+			phong_config.phong.specular_tex = GetTexture(spec_path);
 		
 		_materials.push_back(std::make_shared<PhongReflective>(phong_config));
 
@@ -222,4 +213,19 @@ Volume *Scene::SplitBVH(std::size_t left, std::size_t right)
 	_bounds.emplace_back(BoundingVolume{ left_bvh, right_bvh });
 
 	return &_bounds[_bounds.size() - 1];
+}
+
+Scene::TexturePtr Scene::GetTexture(const std::string &filepath)
+{
+	auto it = _textures.find(filepath);
+
+	if (it == _textures.end())
+	{
+		std::cout << "Loading '" << filepath << "' ..." << std::endl;
+		TexturePtr ptr = std::make_shared<Texture2D>(filepath);
+		_textures.emplace(filepath, ptr);
+		return ptr;
+	}
+
+	return it->second;
 }

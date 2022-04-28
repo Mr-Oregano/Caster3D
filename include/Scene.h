@@ -4,6 +4,7 @@
 #include "Camera.h"
 #include "HitResult.h"
 #include "Material.h"
+#include "Texture.h"
 
 #include "Volume.h"
 #include "Sphere.h"
@@ -13,10 +14,14 @@
 #include <vector>
 #include <memory>
 #include <string>
+#include <unordered_map>
 
 class Scene
 {
 private:
+	using MaterialPtr = std::shared_ptr<Material>;
+	using TexturePtr = std::shared_ptr<Texture2D>;
+
 	const Volume *_root = nullptr;
 
 	// NOTE: We reference volumes and resources by their interfaces, but
@@ -26,9 +31,11 @@ private:
 	std::vector<Triangle> _triangles;
 	std::vector<BoundingVolume> _bounds;
 
-	std::vector<std::shared_ptr<Material>> _materials;
 	std::vector<PointLight> _point_lights;
 	std::vector<DirectionalLight> _dir_lights;
+
+	std::unordered_map<std::string, TexturePtr> _textures;
+	std::vector<MaterialPtr> _materials;
 	
 	Camera _camera{ 90.0f };
 	Vec3 _up{ 0.0, 1.0, 0.0 };
@@ -60,5 +67,5 @@ public:
 
 private:
 	Volume *SplitBVH(std::size_t left, std::size_t right);
-
+	TexturePtr GetTexture(const std::string &filepath);
 };
