@@ -37,6 +37,5 @@ public:
 	Texture2D(std::string filename);
 	~Texture2D();
 
-	Color Sample(double u, double x, TextureSampleParams params = {});
 	Color Sample(Vec2 uv, TextureSampleParams params = {});
 };
