@@ -7,7 +7,7 @@ CPU raytracer written in C++.
 
 
 # Build
-Use [premake5](https://premake.github.io/) to create project files. Building should be relatively simple from there. Just build in your IDE of choice or `make.` if you're using make. 
+Use [premake5](https://premake.github.io/) to create project files. Building should be relatively simple from there. Just build in your environment of choice.
 
 (e.g. Run `premake5 vs2019` to create solution files for Visual Studio 2019)
 
