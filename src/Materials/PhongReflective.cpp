@@ -9,13 +9,7 @@ PhongReflective::PhongReflective(const PhongReflectiveConfig config)
 	// NOTE: We create our own Phong material that we will shade.
 	//		 PhongReflective is an extension on phong.
 	//
-	PhongConfig phong_config{};
-	phong_config.ambient = _config.ambient;
-	phong_config.diffuse = _config.diffuse;
-	phong_config.specular = _config.specular;
-	phong_config.shine = _config.shine;
-
-	_phong.SetConfig(phong_config);
+	_phong = { config.phong };
 }
 
 Color PhongReflective::Shade(const ShadingContext &context, int samples, int max_depth) const
@@ -33,8 +27,12 @@ Color PhongReflective::Shade(const ShadingContext &context, int samples, int max
 	const Vec3 &loc = info.hit_point;
 	const Ray &ray = context.ray;
 
+	Color reflection_col = Color{ _config.reflection };
 
-	if (_config.reflection > 0.0 && _config.transmissivity < 1.0)
+	if (_config.phong.specular_tex)
+		reflection_col *= _config.phong.specular_tex->Sample(info.uv, _config.phong.specular_sampling);
+
+	if (glm::length2(reflection_col) > 0 && _config.transmissivity < 1.0)
 	{
 		// NOTE: We need to add a slight bias to the ray origin in 
 		//		 order to reduce surface acne.
@@ -42,7 +40,8 @@ Color PhongReflective::Shade(const ShadingContext &context, int samples, int max
 		Vec3 new_origin = loc - 0.001 * ray.dir;
 		Ray reflected(new_origin, glm::reflect(ray.dir, normal));
 		Color reflection = scene.Trace(reflected, samples, max_depth - 1);
-		color = glm::mix(color, reflection, _config.reflection);
+
+		color = glm::mix(color, reflection * reflection_col, _config.reflection);
 	}
 
 	if (_config.transmissivity > 0.0)

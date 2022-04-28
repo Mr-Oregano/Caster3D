@@ -4,8 +4,8 @@
 #include <string>
 #include <iostream>
 
-Triangle::Triangle(Vec3 v[3], Vec3 n[3], const Material *material)
-	: _material(material)
+Triangle::Triangle(Vec3 v[3], Vec3 n[3], const Material *material, Color color)
+	: _material(material), _color(color)
 {
 	std::memcpy(_v, v, sizeof(Vec3) * 3);
 	std::memcpy(_n, n, sizeof(Vec3) * 3);
@@ -19,10 +19,10 @@ Triangle::Triangle(Vec3 v[3], Vec3 n[3], const Material *material)
 	_aabb.tr.z = glm::max(v[0].z, glm::max(v[1].z, v[2].z));
 }
 
-Triangle::Triangle(Vec3 v[3], Vec3 n[3], Color color, const Material *material)
-	: Triangle(v, n, material)
+Triangle::Triangle(Vec3 v[3], Vec3 n[3], Vec2 uv[3], const Material *material, Color color)
+	: Triangle(v, n, material, color)
 {
-	_color = color;
+	std::memcpy(_uv, uv, sizeof(Vec2) * 3);
 }
 
 HitResult Triangle::Hit(const Ray &ray) const
@@ -42,6 +42,7 @@ HitResult Triangle::Hit(const Ray &ray) const
 		// for this crap.
 
 		result.normal = interpolate.z * _n[0] + interpolate.x * _n[1] + interpolate.y * _n[2];
+		result.uv = interpolate.z * _uv[0] + interpolate.x * _uv[1] + interpolate.y * _uv[2];
 		result.material = _material;
 		result.triangle_color = _color;
 		result.distance = distance;

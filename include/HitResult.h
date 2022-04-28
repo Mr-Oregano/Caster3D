@@ -9,6 +9,7 @@ struct HitResult
 	const Material *material = nullptr;
 	Vec3 hit_point{ 0.0 };
 	Vec3 normal{ 0.0 };
+	Vec2 uv{ 0.0 };
 	bool hit = false;
 	double distance = 0.0;
 

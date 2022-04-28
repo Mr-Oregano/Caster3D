@@ -1,9 +1,11 @@
 
 #include "Scene.h"
 #include "Metrics.h"
+#include "Log.h"
 
 #include "Phong.h"
 #include "PhongReflective.h"
+#include "Texture.h"
 
 #include "tiny_obj_loader.h"
 
@@ -44,24 +46,36 @@ Scene::Scene(const std::string &filename, const std::string &material_path, Colo
 	for (const auto &m : materials)
 	{
 		PhongReflectiveConfig phong_config;
-		phong_config.specular = { m.specular[0], m.specular[1], m.specular[2] };
-		phong_config.diffuse = { m.diffuse[0], m.diffuse[1], m.diffuse[2] };
-		phong_config.ambient = { m.ambient[0], m.ambient[1], m.ambient[2] };
+		phong_config.phong.specular = { m.specular[0], m.specular[1], m.specular[2] };
+		phong_config.phong.diffuse = { m.diffuse[0], m.diffuse[1], m.diffuse[2] };
+		phong_config.phong.ambient = { m.ambient[0], m.ambient[1], m.ambient[2] };
 		phong_config.refractive_index = m.ior;
-		phong_config.shine = m.shininess;
+		phong_config.phong.shine = m.shininess;
 		phong_config.reflection = m.metallic;
 		phong_config.transmissivity = 1.0 - m.dissolve;
+
+		if (!m.ambient_texname.empty())
+		{
+			std::cout << "AmbientTex: " << material_path + "/" + m.ambient_texname << std::endl;
+			phong_config.phong.ambient_tex = std::make_shared<Texture2D>(material_path + "/" + m.ambient_texname);
+		}
+
+		if (!m.diffuse_texname.empty())
+		{
+			std::cout << "DiffuseTex: " << material_path + "/" + m.diffuse_texname << std::endl;
+			phong_config.phong.diffuse_tex = std::make_shared<Texture2D>(material_path + "/" + m.diffuse_texname);
+		}
+		
+		if (!m.specular_texname.empty())
+		{
+			std::cout << "SpecularTex: " << material_path + "/" + m.specular_texname << std::endl;
+			phong_config.phong.specular_tex = std::make_shared<Texture2D>(material_path + "/" + m.specular_texname);
+		}
 		
 		_materials.push_back(std::make_shared<PhongReflective>(phong_config));
 
-		std::cout << m.name << ":" << std::endl;
-		std::cout << "Specular: (" << phong_config.diffuse.r << ", " << phong_config.diffuse.g << ", " << phong_config.diffuse.b << ")" << std::endl;
-		std::cout << "Diffuse: (" << phong_config.diffuse.r << ", " << phong_config.diffuse.g << ", " << phong_config.diffuse.b << ")" << std::endl;
-		std::cout << "Ambient: (" << phong_config.diffuse.r << ", " << phong_config.diffuse.g << ", " << phong_config.diffuse.b << ")" << std::endl;
-		std::cout << "IOR: " << phong_config.refractive_index << std::endl;
-		std::cout << "Shine: " << phong_config.shine << std::endl;
-		std::cout << "Reflection: " << phong_config.reflection << std::endl;
-		std::cout << "Transmissivity: " << phong_config.transmissivity << std::endl << std::endl;
+		std::cout << "Material '" << m.name << "': " << std::endl;
+		std::cout << phong_config << std::endl << std::endl;
 	}
 
 	for (const auto &s : shapes)
@@ -74,6 +88,7 @@ Scene::Scene(const std::string &filename, const std::string &material_path, Colo
 
 			Vec3 vertices[3];
 			Vec3 normals[3];
+			Vec2 uvs[3];
 
 			for (size_t v = 0; v < 3; v++)
 			{
@@ -88,6 +103,12 @@ Scene::Scene(const std::string &filename, const std::string &material_path, Colo
 				normals[v].x = attrib.normals[3 * size_t(idx.normal_index) + 0];
 				normals[v].y = attrib.normals[3 * size_t(idx.normal_index) + 1];
 				normals[v].z = attrib.normals[3 * size_t(idx.normal_index) + 2];
+
+				if (idx.texcoord_index >= 0) 
+				{
+					uvs[v].x = attrib.texcoords[2 * size_t(idx.texcoord_index) + 0];
+					uvs[v].y = attrib.texcoords[2 * size_t(idx.texcoord_index) + 1];
+				}
 			}
 
 			index_offset += 3;
@@ -96,6 +117,7 @@ Scene::Scene(const std::string &filename, const std::string &material_path, Colo
 			_triangles.emplace_back(Triangle{
 				vertices,
 				normals,
+				uvs,
 				_materials[mat_id].get()
 			});
 		}
