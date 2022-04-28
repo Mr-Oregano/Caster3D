@@ -8,23 +8,45 @@
 #include <string>
 #include <memory>
 #include <chrono>
+#include <ctime>
+
+#define DEFAULT_OUT_PATH "./out/out.png"
+#define DEFAULT_OBJ_PATH "./res/sample.obj"
+#define DEFAULT_MAT_PATH "./res"
 
 // TODO:
 //	- Instrumentation
-//  - Material CPU shaders and BSDFs
+//  - BSDFs
 //		- Fresnel and other lighting effects (Beer's law maybe...)
-//		- Texture sampling
 //		- Caustics
-//	- Light interfaces
-//		- Area lights
-//		- Spot lights
-//  - Global illumination
 //  - Nvidia CUDA core compute
 //
 int main(int argc, char **argv)
 {	
-	ImageBuffer target(1920, 1920);
-	std::shared_ptr<Scene> scene = std::make_shared<Scene>("./res/sample.obj", "./res", Color{ 0.0 });
+	std::string output_path{ DEFAULT_OUT_PATH };
+
+#ifdef _DIST
+	std::string obj_path;
+
+	if (argc > 1)
+	{
+		obj_path = argv[1];
+
+		if (argc > 2)
+			output_path = argv[2];
+	}
+	else
+	{
+		std::cout << "Enter obj file path: ";
+		std::cin >> obj_path;
+	}
+
+	std::size_t path_end = obj_path.find_last_of('/');
+	std::string mat_path = path_end != std::string::npos ? obj_path.substr(0, path_end)  : ".";
+	std::shared_ptr<Scene> scene = std::make_shared<Scene>(obj_path, mat_path, Color{0.0});
+#else
+	std::shared_ptr<Scene> scene = std::make_shared<Scene>(DEFAULT_OBJ_PATH, DEFAULT_MAT_PATH, Color{ 0.0 });
+#endif
 
 	if (!scene)
 	{
@@ -34,6 +56,7 @@ int main(int argc, char **argv)
 
 	scene->AddPointLight({ {  3.0, 5.0, -1.0 }, { 0.5, 1.0, 0.4 }, 4.0, 0.05 });
 	scene->AddPointLight({ { -1.0, 3.0,  1.0 }, { 0.3, 0.1, 1.0 }, 2.0, 0.05 });
+	scene->AddPointLight({ { -1.0, 3.0, 2.0 }, Color{ 1.0 }, 1.0, 0.05 });
 
 	Camera &cam = scene->GetCamera();
 	cam.Translate(Vec3{ 4.0, 2.0, 4.0 });
@@ -41,8 +64,9 @@ int main(int argc, char **argv)
 
 	scene->Build();
 
+	ImageBuffer target(512, 512);
 	RayTracerConfig config;
-	config.samples = 10;
+	config.samples = 4;
 	config.ray_depth = 8;
 	config.thread_count = 64;
 
@@ -57,24 +81,8 @@ int main(int argc, char **argv)
 
 	long long duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
-	metrics.avg_hit_tests_per_raycast /= metrics.raycast_count;
-	metrics.avg_raycasts_per_pixel /= metrics.pixel_count;
-
-	std::cout << std::endl << "Metrics:" << std::endl;
 	std::cout << "Took " << duration / 1000.0 << " seconds..." << std::endl;
-	std::cout << "Pixels: " << metrics.pixel_count << std::endl;
-	std::cout << "Samples: " << metrics.samples_per_pixel << std::endl;
-	std::cout << "Raycasts: " << metrics.raycast_count << std::endl;
-	std::cout << "Triangles: " << metrics.triangle_count << std::endl;
-	std::cout << "BVH Size: " << metrics.bvh_size << std::endl;
-	std::cout << "Avg Hit Tests Per Raycast: " << metrics.avg_hit_tests_per_raycast << std::endl;
-	std::cout << "Avg Raycasts Per pixel: " << metrics.avg_raycasts_per_pixel << std::endl;
 
-	std::string output_path{ "./out.png" };
-
-	if (argc > 1)
-		output_path = argv[1];
-		
 	if (!target.WriteToFile(output_path))
 	{
 		std::cerr << "Failed to create output path '" << output_path << "'." << std::endl;

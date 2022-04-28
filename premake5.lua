@@ -6,7 +6,8 @@ workspace "Caster3D"
 	configurations {
 		"Debug",
 		"Profile",
-		"Release"
+		"Release",
+		"Dist"
 	}
 
 	filter "configurations:Debug"
@@ -18,6 +19,11 @@ workspace "Caster3D"
 		symbols "on"
 
 	filter "configurations:Release"
+		optimize "speed"
+		symbols "off"
+
+	filter "configurations:Dist"
+		defines "_DIST"
 		optimize "speed"
 		symbols "off"
 

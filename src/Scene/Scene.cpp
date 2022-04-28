@@ -18,6 +18,9 @@ Scene::Scene(std::string filename, std::string material_path, Color skybox)
 	if (!material_path.ends_with("/"))
 		material_path += "/";
 
+	std::cout << "Loading '" << filename << "' ..." << std::endl;
+	std::cout << "Material Search Path: '" << material_path << "'" << std::endl << std::endl;
+
 	tinyobj::ObjReaderConfig reader_config;
 	reader_config.mtl_search_path = material_path;
 	reader_config.triangulate = true;

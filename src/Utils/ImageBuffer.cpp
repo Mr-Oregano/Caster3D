@@ -4,6 +4,10 @@
 #include "Maths.h"
 
 #include <stb_image/stb_image_write.h>
+#include <filesystem>
+#include <iostream>
+
+namespace fs = std::filesystem;
 
 ImageBuffer::ImageBuffer(std::uint32_t width, std::uint32_t height)
 	: _width(width), _height(height)
@@ -37,5 +41,19 @@ void ImageBuffer::WritePixel(std::uint32_t px_i, double r, double g, double b)
 
 bool ImageBuffer::WriteToFile(const std::string &filename, int compression)
 {
+	std::size_t path_end = filename.find_last_of('/');
+
+	if (path_end != std::string::npos)
+	{
+		std::string dir = filename.substr(0, path_end);
+
+		// NOTE: Create directory if it does not exist.
+		if (!fs::is_directory(dir) || !fs::exists(dir))
+		{
+			fs::create_directory(dir);
+			std::cout << "Created directory '" << dir << "'" << std::endl;
+		}
+	}
+
 	return stbi_write_png(filename.c_str(), _width, _height, compression, _buffer, _width * _bytes_per_pixel) != 0;
 }
