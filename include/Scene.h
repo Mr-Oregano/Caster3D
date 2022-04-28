@@ -39,7 +39,7 @@ private:
 	bool _loaded = false;
 
 public:
-	Scene(const std::string &filename, const std::string &material_path, Color skybox = Color{ 1.0 });
+	Scene(std::string filename, std::string material_path, Color skybox = Color{ 1.0 });
 	Scene(const Scene&) = delete;
 	Scene& operator=(const Scene&) = delete;
 

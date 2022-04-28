@@ -12,9 +12,12 @@
 #include <algorithm>
 #include <iostream>
 
-Scene::Scene(const std::string &filename, const std::string &material_path, Color skybox)
+Scene::Scene(std::string filename, std::string material_path, Color skybox)
 	: _skybox(skybox)
 {
+	if (!material_path.ends_with("/"))
+		material_path += "/";
+
 	tinyobj::ObjReaderConfig reader_config;
 	reader_config.mtl_search_path = material_path;
 	reader_config.triangulate = true;
@@ -54,22 +57,26 @@ Scene::Scene(const std::string &filename, const std::string &material_path, Colo
 		phong_config.reflection = m.metallic;
 		phong_config.transmissivity = 1.0 - m.dissolve;
 
+		std::string amb_path = material_path + m.ambient_texname;
+		std::string diff_path = material_path + m.diffuse_texname;
+		std::string spec_path = material_path + m.specular_texname;
+
 		if (!m.ambient_texname.empty())
 		{
-			std::cout << "AmbientTex: " << material_path + "/" + m.ambient_texname << std::endl;
-			phong_config.phong.ambient_tex = std::make_shared<Texture2D>(material_path + "/" + m.ambient_texname);
+			std::cout << "Loading '" << amb_path << "' ..." << std::endl;
+			phong_config.phong.ambient_tex = std::make_shared<Texture2D>(amb_path);
 		}
 
 		if (!m.diffuse_texname.empty())
 		{
-			std::cout << "DiffuseTex: " << material_path + "/" + m.diffuse_texname << std::endl;
-			phong_config.phong.diffuse_tex = std::make_shared<Texture2D>(material_path + "/" + m.diffuse_texname);
+			std::cout << "Loading '" << diff_path << "' ..." << std::endl;
+			phong_config.phong.diffuse_tex = std::make_shared<Texture2D>(diff_path);
 		}
 		
 		if (!m.specular_texname.empty())
 		{
-			std::cout << "SpecularTex: " << material_path + "/" + m.specular_texname << std::endl;
-			phong_config.phong.specular_tex = std::make_shared<Texture2D>(material_path + "/" + m.specular_texname);
+			std::cout << "Loading '" << spec_path << "' ..." << std::endl;
+			phong_config.phong.specular_tex = std::make_shared<Texture2D>(spec_path);
 		}
 		
 		_materials.push_back(std::make_shared<PhongReflective>(phong_config));
